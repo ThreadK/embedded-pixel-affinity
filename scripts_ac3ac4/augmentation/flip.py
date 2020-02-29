@@ -13,4 +13,27 @@ class Flip(DataAugment):
         do_ztrans (int): set to 1 to swap z- and x-axes for isotropic data. Default: 0
     """
     def __init__(self, p=0.5, do_ztrans=0):
-        super(Flip, self).__in
+        super(Flip, self).__init__(p)
+        self.do_ztrans = do_ztrans
+
+    def set_params(self):
+        # No change in sample size
+        pass
+
+    def flip_and_swap(self, data, rule):
+        assert data.ndim==3 or data.ndim==4
+        if data.ndim == 3: # 3-channel input in z,y,x
+            # z reflection.
+            if rule[0]:
+                data = data[::-1, :, :]
+            # y reflection.
+            if rule[1]:
+                data = data[:, ::-1, :]
+            # x reflection.
+            if rule[2]:
+                data = data[:, :, ::-1]
+            # Transpose in xy.
+            if rule[3]:
+                data = data.transpose(0, 2, 1)
+            # Transpose in xz.
+            if self.do_ztrans==1 and rule[4]:
