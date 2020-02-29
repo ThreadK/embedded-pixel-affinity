@@ -100,3 +100,64 @@ class Compose(object):
         assert image.ndim == 3 or image.ndim == 4
         margin = (label.shape[1] - self.input_size[1]) // 2
         margin = int(margin)
+        
+        # whether need to crop z or not (missing section augmentation)
+        if label.shape[0] > self.input_size[0]:
+            z_low = np.random.choice(label.shape[0]-self.input_size[0]+1, 1)[0]
+        else:
+            z_low = 0
+        z_high = z_low + self.input_size[0] 
+        z_low, z_high = int(z_low), int(z_high)
+
+        if margin==0: # no need for x,y crop
+            return {'image': image[z_low:z_high], 'label': label[z_low:z_high]}
+        else:    
+            low = margin
+            high = margin + self.input_size[1]
+            if image.ndim == 3:
+                if self.keep_uncropped == True:
+                    return {'image': image[z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high],
+                            'image_uncropped': image,
+                            'label_uncropped': label}               
+                else:
+                    return {'image': image[z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high]}
+            else:
+                if self.keep_uncropped == True:
+                    return {'image': image[:, z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high],
+                            'image_uncropped': image,
+                            'label_uncropped': label}
+                else:
+                    return {'image': image[:, z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high]}                                        
+
+    def __call__(self, data, random_state=np.random.RandomState()):
+        # According thie blog post (https://www.sicara.ai/blog/2019-01-28-how-computer-generate-random-numbers):
+        # we need to be careful when using numpy.random in multiprocess application as it can always generate the 
+        # same output for different processes. Therefore we use np.random.RandomState().
+        data['image'] = data['image'].astype(np.float32)
+
+        ran = random_state.rand(len(self.transforms))
+        for tid, t in enumerate(reversed(self.transforms)):
+            if ran[tid] < t.p:
+                data = t(data, random_state)
+
+        # crop the data to input size
+        if self.keep_uncropped:
+            data['uncropped_image'] = data['image']
+            data['uncropped_label'] = data['label']
+        data = self.crop(data)
+
+        # flip augmentation
+        if self.flip_aug is not None:
+            if random_state.rand() < self.flip_aug.p:
+                data = self.flip_aug(data, random_state)
+
+        if self.keep_non_smoothed:
+            data['non_smoothed'] = data['label']
+
+        if self.smooth:
+            data = self.smooth_edge(data)
+        return data
