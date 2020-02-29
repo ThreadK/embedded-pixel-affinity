@@ -15,4 +15,23 @@ class DataAugment(object):
     def __init__(self, p=0.5):
         assert p >= 0.0 and p <=1.0
         self.p = p
- 
+        self.sample_params = {
+            'ratio': np.array([1.0, 1.0, 1.0]),
+            'add': np.array([0, 0, 0])}
+
+    def set_params(self):
+        """
+        Calculate the appropriate sample size with data augmentation.
+        
+        Some data augmentations (wrap, misalignment, etc.) require a larger sample 
+        size than the original, depending on the augmentation parameters that are 
+        randomly chosen. This function takes the data augmentation 
+        parameters and returns an updated data sampling size accordingly.
+        """
+        raise NotImplementedError
+
+    def __call__(self, data, random_state=None):
+        """
+        Apply the data augmentation.
+
+        For 
