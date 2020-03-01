@@ -37,3 +37,26 @@ class Flip(DataAugment):
                 data = data.transpose(0, 2, 1)
             # Transpose in xz.
             if self.do_ztrans==1 and rule[4]:
+                data = data.transpose(2, 1, 0)
+        else: # 4-channel input in c,z,y,x
+            # z reflection.
+            if rule[0]:
+                data = data[:, ::-1, :, :]
+            # y reflection.
+            if rule[1]:
+                data = data[:, :, ::-1, :]
+            # x reflection.
+            if rule[2]:
+                data = data[:, :, :, ::-1]
+            # Transpose in xy.
+            if rule[3]:
+                data = data.transpose(0, 1, 3, 2)
+            # Transpose in xz.
+            if self.do_ztrans==1 and rule[4]:
+                data = data.transpose(0, 3, 2, 1)
+        return data
+    
+    def __call__(self, data, random_state=np.random):
+        output = {}
+
+     
