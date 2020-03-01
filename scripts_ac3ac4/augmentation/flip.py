@@ -59,4 +59,10 @@ class Flip(DataAugment):
     def __call__(self, data, random_state=np.random):
         output = {}
 
-     
+        rule = random_state.randint(2, size=4+self.do_ztrans)
+        augmented_image = self.flip_and_swap(data['image'], rule)
+        augmented_label = self.flip_and_swap(data['label'], rule)
+        output['image'] = augmented_image
+        output['label'] = augmented_label
+
+        return output
