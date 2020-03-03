@@ -29,4 +29,25 @@ class Grayscale(DataAugment):
     def __call__(self, data, random_state=np.random):
 
         if self.mode == 'mix':
-            mode 
+            mode = '3D' if random_state.rand() > 0.5 else '2D'
+        else:
+            mode = self.mode
+
+        # apply augmentations  
+        if mode == '2D': 
+            data = self._augment2D(data, random_state)
+        if mode == '3D': 
+            data = self._augment3D(data, random_state)
+        return data
+
+    def _augment2D(self, data, random_state=np.random):
+        """
+        Adapted from ELEKTRONN (http://elektronn.org/).
+        """
+        imgs = data['image']
+        transformedimgs = np.copy(imgs)
+        ran = random_state.rand(transformedimgs.shape[-3]*3)
+
+        for z in range(transformedimgs.shape[-3]):
+            img = transformedimgs[z, :, :]
+          
