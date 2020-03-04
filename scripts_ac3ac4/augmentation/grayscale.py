@@ -89,4 +89,9 @@ class Grayscale(DataAugment):
 
     ####################################################################
     ## Setters.
-    #########################################################
+    ####################################################################
+
+    def _set_mode(self, mode):
+        """Set 2D/3D/mix greyscale value augmentation mode."""
+        assert mode=='2D' or mode=='3D' or mode=='mix'
+        self.mode = mode
