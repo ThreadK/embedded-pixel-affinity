@@ -50,4 +50,23 @@ class Grayscale(DataAugment):
 
         for z in range(transformedimgs.shape[-3]):
             img = transformedimgs[z, :, :]
-          
+            img *= 1 + (ran[z*3] - 0.5)*self.CONTRAST_FACTOR
+            img += (ran[z*3+1] - 0.5)*self.BRIGHTNESS_FACTOR
+            img = np.clip(img, 0, 1)
+            img **= 2.0**(ran[z*3+2]*2 - 1)
+            transformedimgs[z, :, :] = img
+
+        data['image'] = transformedimgs
+        return data    
+
+    def _augment3D(self, data, random_state=np.random):
+        """
+        Adapted from ELEKTRONN (http://elektronn.org/).
+        """
+        ran = random_state.rand(3)
+
+        imgs = data['image']
+        transformedimgs = np.copy(imgs)
+        transformedimgs *= 1 + (ran[0] - 0.5)*self.CONTRAST_FACTOR
+        transformedimgs += (ran[1] - 0.5)*self.BRIGHTNESS_FACTOR
+    
