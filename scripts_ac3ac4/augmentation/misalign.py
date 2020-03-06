@@ -15,4 +15,21 @@ class MisAlignment(DataAugment):
                  rotate_ratio=0.0,
                  p=0.5):
         super(MisAlignment, self).__init__(p=p)
-        self
+        self.displacement = displacement
+        self.rotate_ratio = rotate_ratio
+        self.set_params()
+
+    def set_params(self):
+        self.sample_params['add'] = [0, 
+                                     int(math.ceil(self.displacement / 2.0)), 
+                                     int(math.ceil(self.displacement / 2.0))]
+
+    def misalignment(self, data, random_state):
+        images = data['image'].copy()
+        labels = data['label'].copy()
+
+        out_shape = (images.shape[0], 
+                     images.shape[1]-self.displacement, 
+                     images.shape[2]-self.displacement)    
+        new_images = np.zeros(out_shape, images.dtype)
+     
