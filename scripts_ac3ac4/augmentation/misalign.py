@@ -32,4 +32,17 @@ class MisAlignment(DataAugment):
                      images.shape[1]-self.displacement, 
                      images.shape[2]-self.displacement)    
         new_images = np.zeros(out_shape, images.dtype)
-     
+        new_labels = np.zeros(out_shape, labels.dtype)
+
+        x0 = random_state.randint(self.displacement)
+        y0 = random_state.randint(self.displacement)
+        x1 = random_state.randint(self.displacement)
+        y1 = random_state.randint(self.displacement)
+        idx = random_state.choice(np.array(range(1, out_shape[0]-1)), 1)[0]
+
+        if random_state.rand() < 0.5:
+            # slip misalignment
+            new_images = images[:, y0:y0+out_shape[1], x0:x0+out_shape[2]]
+            new_labels = labels[:, y0:y0+out_shape[1], x0:x0+out_shape[2]]
+            new_images[idx] = images[idx, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+            new_labels[idx] = labels[idx, y1:y1+out_shape[1], x1:x1+out_shape[2]]
