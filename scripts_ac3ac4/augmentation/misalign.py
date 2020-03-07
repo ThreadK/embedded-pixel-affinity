@@ -75,4 +75,20 @@ class MisAlignment(DataAugment):
             for i in range(idx, images.shape[0]):
                 images[i] = cv2.warpAffine(images[i], M, (height,width), 1.0, 
                     flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
- 
+                labels[i] = cv2.warpAffine(labels[i], M, (height,width), 1.0, 
+                    flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT)
+
+        new_images = images.copy()
+        new_labels = labels.copy()
+
+        return new_images, new_labels
+
+    def random_rotate_matrix(self, height, random_state):
+        x = (self.displacement / 2.0)
+        y = ((height - self.displacement) / 2.0) * 1.42
+        angle = math.asin(x/y) * 2.0 * 57.2958 # convert radians to degrees
+        rand_angle = (random_state.rand() - 0.5) * 2.0 * angle
+        M = cv2.getRotationMatrix2D((height/2, height/2), rand_angle, 1)
+        return M
+
+    def __call__(self, data, random_state=np.
