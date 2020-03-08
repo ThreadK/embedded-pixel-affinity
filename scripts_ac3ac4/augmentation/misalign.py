@@ -91,4 +91,9 @@ class MisAlignment(DataAugment):
         M = cv2.getRotationMatrix2D((height/2, height/2), rand_angle, 1)
         return M
 
-    def __call__(self, data, random_state=np.
+    def __call__(self, data, random_state=np.random):
+        if random_state.rand() < self.rotate_ratio:
+            new_images, new_labels = self.misalignment_rotate(data, random_state)
+        else:
+            new_images, new_labels = self.misalignment(data, random_state)
+        return {'image': new_images, 'label': new_labels}
