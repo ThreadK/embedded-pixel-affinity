@@ -26,4 +26,22 @@ class Rescale(DataAugment):
 
     def set_params(self):
         assert (self.low >= 0.5)
-        a
+        assert (self.low <= 1.0)
+        ratio = 1.0 / self.low
+        self.sample_params['ratio'] = [1.0, ratio, ratio]
+
+    def random_scale(self, random_state):
+        rand_scale = random_state.rand() * (self.high - self.low) + self.low
+        return rand_scale
+
+    def apply_rescale(self, image, label, sf_x, sf_y, random_state):
+        # apply image and mask at the same time
+        transformed_image = image.copy()
+        transformed_label = label.copy()
+
+        y_length = int(sf_y * image.shape[1])
+        if y_length <= image.shape[1]:
+            y0 = random_state.randint(low=0, high=image.shape[1]-y_length+1)
+            y1 = y0 + y_length
+            transformed_image = transformed_image[:, y0:y1, :]
+            transfor
