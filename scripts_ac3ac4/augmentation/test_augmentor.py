@@ -12,4 +12,21 @@ class TestAugmentor(object):
     By default the test-time augmentor returns the pixel-wise mean value of the predictions.
 
     Args:
-        mode (str): one of ``'min'``, ``'max'`` or ``'mean
+        mode (str): one of ``'min'``, ``'max'`` or ``'mean'``. Default: ``'mean'``
+        num_aug (int): number of data augmentation variants: 0, 4 or 16. Default: 4
+
+    Examples::
+        >>> from connectomics.data.augmentation import TestAugmentor
+        >>> test_augmentor = TestAugmentor(mode='mean', num_aug=16)
+        >>> output = test_augmentor(model, inputs) # output is a numpy.ndarray on CPU
+    """
+    def __init__(self, mode='mean', num_aug=4):
+        self.mode = mode
+        self.num_aug = num_aug
+        assert num_aug in [0, 4, 16], "TestAugmentor.num_aug should be either 0, 4 or 16!"
+
+    def __call__(self, model, data):
+        out = None
+        cc = 0
+        if self.num_aug == 0:
+            opts = itertools.product(
