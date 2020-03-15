@@ -29,4 +29,20 @@ class TestAugmentor(object):
         out = None
         cc = 0
         if self.num_aug == 0:
-            opts = itertools.product(
+            opts = itertools.product((False, ), (False, ), (False, ), (False, ))
+        elif self.num_aug == 4:
+            opts = itertools.product((False, ), (False, ), (False, True), (False, True))
+        else:
+            opts = itertools.product((False, True), (False, True), (False, True), (False, True))
+
+        for xflip, yflip, zflip, transpose in opts:
+            volume = data.clone()
+            # b,c,z,y,x 
+
+            if xflip:
+                volume = torch.flip(volume, [4])
+            if yflip:
+                volume = torch.flip(volume, [3])
+            if zflip:
+                volume = torch.flip(volume, [2])
+            if transp
