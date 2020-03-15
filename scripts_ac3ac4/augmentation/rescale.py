@@ -84,4 +84,6 @@ class Rescale(DataAugment):
             sf_y = self.random_scale(random_state)
 
         output = {}
-        output['image'], output['label'] = self.apply_rescale(image
+        output['image'], output['label'] = self.apply_rescale(image, label, sf_x, sf_y, random_state)
+
+        return output
