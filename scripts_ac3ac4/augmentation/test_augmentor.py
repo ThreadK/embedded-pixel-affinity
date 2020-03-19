@@ -65,4 +65,30 @@ class TestAugmentor(object):
                 if self.mode == 'min':
                     out = np.ones(vout.shape, dtype=np.float32)
                 elif self.mode == 'max':
-                    
+                    out = np.zeros(vout.shape, dtype=np.float32)
+                elif self.mode == 'mean':
+                    out = np.zeros(vout.shape, dtype=np.float32)
+
+            if self.mode == 'min':
+                out = np.minimum(out, vout)
+            elif self.mode == 'max':
+                out = np.maximum(out, vout)
+            elif self.mode == 'mean':
+                out += vout
+            cc+=1
+
+        if self.mode == 'mean':
+            out = out/cc
+
+        return out
+
+    def update_name(self, name):
+        extension = "_"
+        if self.num_aug == 4:
+            extension += "tz"
+        elif self.num_aug == 16:
+            extension += "tzyx"
+        else:
+            return name
+            
+        # U
