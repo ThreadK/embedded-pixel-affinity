@@ -91,4 +91,8 @@ class TestAugmentor(object):
         else:
             return name
             
-        # U
+        # Update the suffix of the output filename to indicate
+        # the use of test-time data augmentation.
+        name_list = name.split('.')
+        new_filename = name_list[0] + extension + "." + name_list[1]
+        return new_filename
