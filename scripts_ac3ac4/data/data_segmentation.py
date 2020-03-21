@@ -254,3 +254,30 @@ def weight_unet2d(seg, w0=10, sigma=5):
     seg_ids = np.unique(seg)
     seg_ids = seg_ids[seg_ids>0]
     nrows, ncols = seg.shape    
+    distMap = np.ones((nrows * ncols, 2))*(nrows+ncols)
+    X1, Y1 = np.meshgrid(range(ncols), range(nrows))
+    X1, Y1 = X1.reshape(1,-1), Y1.reshape(1,-1)
+    for i, seg_id in enumerate(seg_ids):
+        # find the boundary of each mask,
+        # compute the distance of each pixel from this boundary
+        bounds = find_boundaries(seg==seg_id, mode='inner')
+        Y2, X2 = np.nonzero(bounds)
+        dist = np.sqrt((X2.reshape(-1,1) - X1) ** 2 + (Y2.reshape(-1,1) - Y1) ** 2).min(axis=0)
+        m1 = dist<distMap[:,0]
+        distMap[m1,1] = distMap[m1,0]
+        distMap[m1,0] = dist[m1]
+        m2 = (dist>distMap[:,0])*(dist<distMap[:,1])*np.logical_not(m1)
+        distMap[m2,1] = dist[m2]
+    if len(seg_ids) == 1:
+        loss_map = w0 * np.exp((-1 * distMap[:,0] ** 2) / (2 * (sigma ** 2)))
+    else:        
+        loss_map = w0 * np.exp((-1 * distMap.sum(axis=1) ** 2) / (2 * (sigma ** 2)))
+    
+    loss_map = loss_map.reshape((nrows,ncols))
+    # add class weight map    
+    wc_1 = (seg==0).mean()
+    wc_0 = 1 - wc_1
+    loss_map[seg>0] += wc_1
+    loss_map[seg==0] += wc_0
+    return loss_map
+
