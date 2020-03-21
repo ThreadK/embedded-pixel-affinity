@@ -39,4 +39,25 @@ def distance_transform(label,
                        relabel: bool = True, 
                        padding: bool = False,
                        resolution: Tuple[int, ...] = (1.0, 1.0)):
-    """Euclidean distance transform
+    """Euclidean distance transform (DT or EDT).
+    """
+    eps = 1e-6
+    pad_size = 2
+
+    if relabel:
+        label = label_cc(label)
+
+    if padding:
+        # The distance_transform_edt function does not treat image border
+        # as background. If image border needs to be considered as background
+        # in distance calculation, set padding to True.
+        label = np.pad(label, pad_size, mode='constant', constant_values=0)
+
+    label_shape = label.shape
+    distance = np.zeros(label_shape, dtype=np.float32) + bg_value
+    semantic = np.zeros(label_shape, dtype=np.uint8)
+
+    indices = np.unique(label)
+    if indices[0] == 0:
+        if len(indices) > 1: # exclude background
+       
