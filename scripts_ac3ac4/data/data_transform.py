@@ -76,4 +76,24 @@ def distance_transform(label,
     if padding:
         # Unpad the output array to preserve original shape.
         distance = array_unpad(distance, get_padsize(pad_size, ndim=distance.ndim))
-        semantic 
+        semantic = array_unpad(semantic, get_padsize(pad_size, ndim=distance.ndim))
+
+    return distance, semantic   
+
+def energy_quantize(energy, levels=10):
+    """Convert the continuous energy map into the quantized version.
+    """
+    # np.digitize returns the indices of the bins to which each 
+    # value in input array belongs. The default behavior is bins[i-1] <= x < bins[i].
+    bins = [-1.0]
+    for i in range(levels):
+        bins.append(float(i) / float(levels))
+    bins.append(1.1)
+    bins = np.array(bins)
+    quantized = np.digitize(energy, bins) - 1
+    return quantized.astype(np.int64)
+
+def decode_quantize(output, mode='max'):
+    assert type(output) in [torch.Tensor, np.ndarray]
+    assert mode in ['max', 'mean']
+    
