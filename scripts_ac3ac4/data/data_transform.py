@@ -114,4 +114,23 @@ def _decode_quant_torch(output, mode='max'):
         bins = bins.view(1, -1, 1)
         bins = bins.to(output.device)
 
-        output = output.view(out_shape[0], out_shape[1], -1) # (B, 
+        output = output.view(out_shape[0], out_shape[1], -1) # (B, C, *)
+        pred = torch.softmax(output, axis=1)
+        energy = (pred*bins).view(out_shape).sum(1)
+
+    return energy
+
+def _decode_quant_numpy(output, mode='max'):
+    # output: numpy array of shape (C, *)
+    if mode == 'max':
+        pred = np.argmax(output, axis=0)
+        max_value = output.shape[0]
+        energy = pred / float(max_value)  
+    elif mode == 'mean':  
+        out_shape = output.shape
+        bins = np.array([0.1 * float(x-1) for x in range(11)])
+        bins = bins.reshape(-1, 1)
+
+        output = output.reshape(out_shape[0], -1) # (C, *)
+        pred = scipy.special.softmax(output, axis=0)
+        energy 
