@@ -133,4 +133,6 @@ def _decode_quant_numpy(output, mode='max'):
 
         output = output.reshape(out_shape[0], -1) # (C, *)
         pred = scipy.special.softmax(output, axis=0)
-        energy 
+        energy = (pred*bins).reshape(out_shape).sum(0)
+
+    return energy
