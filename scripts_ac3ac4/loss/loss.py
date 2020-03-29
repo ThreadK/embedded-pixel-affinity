@@ -21,4 +21,20 @@ class JaccardLoss(nn.Module):
     def jaccard_loss(self, pred, target):
         loss = 0.
         # for each sample in the batch
-        for index in range
+        for index in range(pred.size()[0]):
+            iflat = pred[index].view(-1)
+            tflat = target[index].view(-1)
+            intersection = (iflat * tflat).sum()
+            loss += 1 - ((intersection + self.smooth) / 
+                    ( iflat.sum() + tflat.sum() - intersection + self.smooth))
+            #print('loss:',intersection, iflat.sum(), tflat.sum())
+
+        # size_average=True for the jaccard loss
+        return loss / float(pred.size()[0])
+
+    def jaccard_loss_batch(self, pred, target):
+        iflat = pred.view(-1)
+        tflat = target.view(-1)
+        intersection = (iflat * tflat).sum()
+        loss = 1 - ((intersection + self.smooth) / 
+               ( iflat.sum() + tflat.sum()
