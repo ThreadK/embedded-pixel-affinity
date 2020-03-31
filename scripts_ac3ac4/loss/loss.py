@@ -37,4 +37,21 @@ class JaccardLoss(nn.Module):
         tflat = target.view(-1)
         intersection = (iflat * tflat).sum()
         loss = 1 - ((intersection + self.smooth) / 
-               ( iflat.sum() + tflat.sum()
+               ( iflat.sum() + tflat.sum() - intersection + self.smooth))
+        #print('loss:',intersection, iflat.sum(), tflat.sum())
+        return loss
+
+    def forward(self, pred, target):
+        #_assert_no_grad(target)
+        if not (target.size() == pred.size()):
+            raise ValueError("Target size ({}) must be the same as pred size ({})".format(target.size(), pred.size()))
+        if self.reduce:
+            loss = self.jaccard_loss(pred, target)
+        else:    
+            loss = self.jaccard_loss_batch(pred, target)
+        return loss
+
+class DiceLoss(nn.Module):
+    """DICE loss.
+    """
+    # https://lars76.github.io/neural-networks/object-detection/losses-for-se
