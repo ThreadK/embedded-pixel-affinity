@@ -54,4 +54,23 @@ class JaccardLoss(nn.Module):
 class DiceLoss(nn.Module):
     """DICE loss.
     """
-    # https://lars76.github.io/neural-networks/object-detection/losses-for-se
+    # https://lars76.github.io/neural-networks/object-detection/losses-for-segmentation/
+
+    def __init__(self, size_average=True, reduce=True, smooth=100.0, power=1):
+        super(DiceLoss, self).__init__()
+        self.smooth = smooth
+        self.reduce = reduce
+        self.power = power
+
+    def dice_loss(self, pred, target):
+        loss = 0.
+
+        for index in range(pred.size()[0]):
+            iflat = pred[index].view(-1)
+            tflat = target[index].view(-1)
+            intersection = (iflat * tflat).sum()
+            if self.power==1:
+                loss += 1 - ((2. * intersection + self.smooth) / 
+                        ( iflat.sum() + tflat.sum() + self.smooth))
+            else:
+                l
