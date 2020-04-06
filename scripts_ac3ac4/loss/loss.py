@@ -157,4 +157,21 @@ class WeightedCE(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, target, weig
+    def forward(self, pred, target, weight_mask=None):
+        # Different from, F.binary_cross_entropy, the "weight" parameter
+        # in F.cross_entropy is a manual rescaling weight given to each 
+        # class. Therefore we need to multiply the weight mask after the
+        # loss calculation.
+        loss = F.cross_entropy(pred, target, reduction='none')
+        if weight_mask is not None:
+            loss = loss * weight_mask
+        return loss.mean()
+
+#######################################################
+# 1. Regularization
+#######################################################
+
+class BinaryReg(nn.Module):
+    """Regularization for encouraging the outputs to be binary.
+    """
+    def 
