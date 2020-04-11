@@ -161,3 +161,4 @@ def merge_add(x1, x2):
     # x1 bigger
     offset = [(x1.size()[x]-x2.size()[x])//2 for x in range(2, x1.dim())]
     return x2 + x1[:, :, offset[0]:offset[0]+x2.size(2), offset[1]:offset[1]+x2.size(3), offset[2]:offset[2]+x2.size(4)]
+
