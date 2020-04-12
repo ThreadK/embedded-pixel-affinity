@@ -33,4 +33,21 @@ class SELayerCS(nn.Module):
                 SynchronizedBatchNorm1d(channel // reduction),
                 nn.ELU(inplace=True),
                 nn.Linear(channel // reduction, channel),
-                SynchronizedBatchNorm1d(ch
+                SynchronizedBatchNorm1d(channel),
+                nn.Sigmoid())
+
+        self.sc = nn.Sequential(
+                nn.Conv3d(channel, 1, kernel_size=(1, 1, 1)),
+                SynchronizedBatchNorm3d(1),
+                nn.ELU(inplace=True),
+                nn.MaxPool3d(kernel_size=(1, 8, 8), stride=(1, 8, 8)),
+                conv3d_bn_elu(1, 1, kernel_size=(3, 3, 3), padding=(1, 1, 1)),
+                nn.Upsample(scale_factor=(1, 8, 8), mode='trilinear', align_corners=False),
+                nn.Conv3d(1, channel, kernel_size=(1, 1, 1)),
+                SynchronizedBatchNorm3d(channel),
+                nn.Sigmoid())     
+
+    def forward(self, x):
+        b, c, _, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+  
