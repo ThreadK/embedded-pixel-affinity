@@ -50,4 +50,7 @@ class SELayerCS(nn.Module):
     def forward(self, x):
         b, c, _, _, _ = x.size()
         y = self.avg_pool(x).view(b, c)
-  
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        z = self.sc(x)
+        return (x * y) + (x * z)    
+
