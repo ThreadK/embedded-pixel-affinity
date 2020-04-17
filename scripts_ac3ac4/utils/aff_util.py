@@ -34,4 +34,25 @@ def affinitize(img, ret=None, dst=(1,1,1), dtype='float32'):
             s1.append(slice(None))
             s2.append(slice(None))
         elif dst[i] > 0:
-            s0.append(slic
+            s0.append(slice(dst[i],  None))
+            s1.append(slice(dst[i],  None))
+            s2.append(slice(None, -dst[i]))
+        else:
+            s0.append(slice(None,  dst[i]))
+            s1.append(slice(-dst[i], None))
+            s2.append(slice(None,  dst[i]))
+
+    ret[s0] = (img[s1]==img[s2]) & (img[s1]>0)
+    return ret[np.newaxis,...]
+
+def bmap_to_affgraph(bmap,nhood,return_min_idx=False):
+    # constructs an affinity graph from a boundary map
+    # assume affinity graph is represented as:
+    # shape = (e, z, y, x)
+    # nhood.shape = (edges, 3)
+    shape = bmap.shape
+    nEdge = nhood.shape[0]
+    aff = np.zeros((nEdge,)+shape,dtype=np.int32)
+    minidx = np.zeros((nEdge,)+shape,dtype=np.int32)
+
+    f
