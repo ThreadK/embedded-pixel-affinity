@@ -75,4 +75,21 @@ def bmap_to_affgraph(bmap,nhood,return_min_idx=False):
                             max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] > \
                         bmap[max(0,nhood[e,0]):min(shape[0],shape[0]+nhood[e,0]), \
                             max(0,nhood[e,1]):min(shape[1],shape[1]+nhood[e,1]), \
-              
+                            max(0,nhood[e,2]):min(shape[2],shape[2]+nhood[e,2])]
+    return aff
+
+def seg_to_affgraph(seg,nhood,pad=''):
+    # constructs an affinity graph from a segmentation
+    # assume affinity graph is represented as:
+    # shape = (e, z, y, x)
+    # nhood.shape = (edges, 3)
+    shape = seg.shape
+    nEdge = nhood.shape[0]
+    aff = np.zeros((nEdge,)+shape,dtype=np.int32)
+
+    for e in range(nEdge):
+        aff[e, \
+            max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
+            max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
+            max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] = \
+                        (seg[max(0,-nhood[e,0]):min(sha
