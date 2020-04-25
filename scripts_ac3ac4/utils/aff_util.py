@@ -113,4 +113,20 @@ def seg_to_affgraph(seg,nhood,pad=''):
 
 def affgraph_to_edgelist(aff,nhood):
     node1,node2 = nodelist_like(aff.shape[1:],nhood)
-    return (node1.ravel(),
+    return (node1.ravel(),node2.ravel(),aff.ravel())
+
+def nodelist_like(shape,nhood):
+    # constructs the node lists corresponding to the edge list representation of an affinity graph
+    # assume  node shape is represented as:
+    # shape = (z, y, x)
+    # nhood.shape = (edges, 3)
+    nEdge = nhood.shape[0]
+    nodes = np.arange(np.prod(shape),dtype=np.uint64).reshape(shape)
+    node1 = np.tile(nodes,(nEdge,1,1,1))
+    node2 = np.full(node1.shape,-1,dtype=np.uint64)
+
+    for e in range(nEdge):
+        node2[e, \
+            max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
+            max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
+            max(0,-nhood[e,2]):min(shape[2],shape[2]-nh
