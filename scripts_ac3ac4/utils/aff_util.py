@@ -100,4 +100,17 @@ def seg_to_affgraph(seg,nhood,pad=''):
                             max(0,nhood[e,2]):min(shape[2],shape[2]+nhood[e,2])] ) \
                         * ( seg[max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
                             max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
-                            max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] > 0 ) 
+                            max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] > 0 ) \
+                        * ( seg[max(0,nhood[e,0]):min(shape[0],shape[0]+nhood[e,0]), \
+                            max(0,nhood[e,1]):min(shape[1],shape[1]+nhood[e,1]), \
+                            max(0,nhood[e,2]):min(shape[2],shape[2]+nhood[e,2])] > 0 )
+    if nEdge==3 and pad == 'replicate': # pad the boundary affinity
+        aff[0,0] = (seg[0]>0).astype(aff.dtype)                                                                  
+        aff[1,:,0] = (seg[:,0]>0).astype(aff.dtype)                                                              
+        aff[2,:,:,0] = (seg[:,:,0]>0).astype(aff.dtype)   
+
+    return aff
+
+def affgraph_to_edgelist(aff,nhood):
+    node1,node2 = nodelist_like(aff.shape[1:],nhood)
+    return (node1.ravel(),
