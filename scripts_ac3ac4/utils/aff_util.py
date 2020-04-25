@@ -92,4 +92,12 @@ def seg_to_affgraph(seg,nhood,pad=''):
             max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
             max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
             max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] = \
-                        (seg[max(0,-nhood[e,0]):min(sha
+                        (seg[max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
+                            max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
+                            max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] == \
+                         seg[max(0,nhood[e,0]):min(shape[0],shape[0]+nhood[e,0]), \
+                            max(0,nhood[e,1]):min(shape[1],shape[1]+nhood[e,1]), \
+                            max(0,nhood[e,2]):min(shape[2],shape[2]+nhood[e,2])] ) \
+                        * ( seg[max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
+                            max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
+                            max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] > 0 ) 
