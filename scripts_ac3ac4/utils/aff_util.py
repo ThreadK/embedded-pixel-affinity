@@ -129,4 +129,11 @@ def nodelist_like(shape,nhood):
         node2[e, \
             max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
             max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1]), \
-            max(0,-nhood[e,2]):min(shape[2],shape[2]-nh
+            max(0,-nhood[e,2]):min(shape[2],shape[2]-nhood[e,2])] = \
+                nodes[max(0,nhood[e,0]):min(shape[0],shape[0]+nhood[e,0]), \
+                     max(0,nhood[e,1]):min(shape[1],shape[1]+nhood[e,1]), \
+                     max(0,nhood[e,2]):min(shape[2],shape[2]+nhood[e,2])]
+
+    return (node1, node2)
+
+
