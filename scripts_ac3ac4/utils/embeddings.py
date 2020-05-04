@@ -48,4 +48,22 @@ def embedding_slic(embeddings, run_pca=True):
 
 def _embeddings_to_probabilities(embed1, embed2, delta, embedding_axis):
     probs = (2 * delta - np.linalg.norm(embed1 - embed2, axis=embedding_axis)) / (2 * delta)
-   
+    probs = np.maximum(probs, 0) ** 2
+    return probs
+
+
+def edge_probabilities_from_embeddings(embeddings, segmentation, rag, delta):
+    # TODO this looks inefficient :(
+    import vigra
+    n_nodes = rag.numberOfNodes
+    embed_dim = embeddings.shape[0]
+
+    segmentation = segmentation.astype('uint32')
+    mean_embeddings = np.zeros((n_nodes, embed_dim), dtype='float32')
+    for cid in range(embed_dim):
+        mean_embed = vigra.analysis.extractRegionFeatures(embeddings[cid],
+                                                          segmentation, features=['mean'])['mean']
+        mean_embeddings[:, cid] = mean_embed
+
+    uv_ids = rag.uvIds()
+    embed_u = mean_embeddings[uv_ids[:,
