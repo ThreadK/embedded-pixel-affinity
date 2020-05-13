@@ -99,4 +99,25 @@ def embeddings_to_affinities(embeddings, offsets, delta, invert=False):
     affinities = np.zeros((n_channels,) + shape, dtype='float32')
 
     for cid, off in enumerate(offsets):
-        #
+        # we need to  shift in the other direction in order to
+        # get the correct offset
+        # also, we need to add a zero shift in the first axis
+        shift_off = [0] + [-o for o in off]
+        # we could also shift via np.pad and slicing
+        shifted = shift(embeddings, shift_off, order=0, prefilter=False)
+        affs = _embeddings_to_probabilities(embeddings, shifted, delta, embedding_axis=0)
+        affinities[cid] = affs
+
+    if invert:
+        affinities = 1. - affinities
+
+    return affinities
+
+
+if __name__ == '__main__':
+    # shape = (8, 128, 128)
+    shape = (16, 18, 160, 160)
+    x = np.random.rand(*shape)
+    # offsets = [[-1, 0], [0, -1],
+    #             [-3, 0], [0, -3],
+    #   
