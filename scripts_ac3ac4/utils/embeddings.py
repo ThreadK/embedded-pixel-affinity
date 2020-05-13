@@ -66,4 +66,19 @@ def edge_probabilities_from_embeddings(embeddings, segmentation, rag, delta):
         mean_embeddings[:, cid] = mean_embed
 
     uv_ids = rag.uvIds()
-    embed_u = mean_embeddings[uv_ids[:,
+    embed_u = mean_embeddings[uv_ids[:, 0]]
+    embed_v = mean_embeddings[uv_ids[:, 1]]
+    edge_probabilities = 1. - _embeddings_to_probabilities(embed_u, embed_v, delta, embedding_axis=1)
+    return edge_probabilities
+
+
+# could probably be implemented more efficiently with shift kernels
+# instead of explicit call to shift
+# (or implement in C++ to save memory)
+def embeddings_to_affinities(embeddings, offsets, delta, invert=False):
+    """ Convert embeddings to affinities.
+
+    Computes the affinity according to the formula
+    a_ij = max((2 * delta - ||x_i - x_j||) / 2 * delta, 0) ** 2,
+    where delta is the push force used in training the embeddings.
+    Introduced in "Learning Dense Voxel Embeddings for 3D Neuron Reconstru
