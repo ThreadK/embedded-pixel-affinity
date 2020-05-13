@@ -81,4 +81,22 @@ def embeddings_to_affinities(embeddings, offsets, delta, invert=False):
     Computes the affinity according to the formula
     a_ij = max((2 * delta - ||x_i - x_j||) / 2 * delta, 0) ** 2,
     where delta is the push force used in training the embeddings.
-    Introduced in "Learning Dense Voxel Embeddings for 3D Neuron Reconstru
+    Introduced in "Learning Dense Voxel Embeddings for 3D Neuron Reconstruction":
+    https://arxiv.org/pdf/1909.09872.pdf
+
+    Arguments:
+        embeddings [np.ndarray] - the array with embeddings
+        offsets [list] - the offset vectors for which to compute affinities
+        delta [float] - the delta factor used in the push force when training the embeddings
+        invert [bool] - whether to invert the affinites (default=False)
+    """
+    ndim = embeddings.ndim - 1
+    if not all(len(off) == ndim for off in offsets):
+        raise ValueError("Incosistent dimension of offsets and embeddings")
+
+    n_channels = len(offsets)
+    shape = embeddings.shape[1:]
+    affinities = np.zeros((n_channels,) + shape, dtype='float32')
+
+    for cid, off in enumerate(offsets):
+        #
