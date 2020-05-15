@@ -120,4 +120,8 @@ if __name__ == '__main__':
     x = np.random.rand(*shape)
     # offsets = [[-1, 0], [0, -1],
     #             [-3, 0], [0, -3],
-    #   
+    #             [-9, 0], [0, -9]]
+    offsets = [[-1, 0, 0], [0, -1, 0], [0, 0, -1]]
+    delta = 1.5
+    affs = embeddings_to_affinities(x, offsets, delta)
+    print(affs.shape)
