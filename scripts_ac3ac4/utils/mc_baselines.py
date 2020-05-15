@@ -29,4 +29,21 @@ def compute_long_range_mc_superpixels(affinities, offsets,
                                       only_repulsive_lr, n_threads,
                                       stacked_2d=True):
     segmenter = LongRangeMulticutSuperpixel(offsets=offsets, only_repulsive_lr=only_repulsive_lr,
-                                            stacke
+                                            stacked_2d=stacked_2d, n_threads=n_threads)
+    return segmenter(affinities)
+
+
+def compute_lmc_superpixels(affinities, offsets, n_threads, stacked_2d=True):
+    segmenter = LmcSuperpixel(offsets=offsets, n_threads=n_threads, stacked_2d=stacked_2d)
+    return segmenter(affinities)
+
+
+def size_filter(hmap, seg, threshold):
+    import vigra
+    segments, counts = np.unique(seg, return_counts=True)
+    mask = np.ma.masked_array(seg, np.in1d(seg, segments[counts < threshold])).mask
+    filtered = seg.copy()
+    filtered[mask] = 0
+    filtered, _ = vigra.analysis.watershedsNew(hmap, seeds=filtered.astype("uint32"))
+    filtered, max_label, _ = vigra.analysis.relabelConsecutive(filtered, start_label=1)
+    return filtered,
