@@ -86,4 +86,23 @@ def lifted_multicut(n_nodes, local_uvs, local_costs, lifted_uvs, lifted_costs, t
     graph.insertEdges(local_uvs)
 
     lifted_obj = nlmc.liftedMulticutObjective(graph)
-    lifted_obj.setCosts(local_
+    lifted_obj.setCosts(local_uvs, local_costs)
+    lifted_obj.setCosts(lifted_uvs, lifted_costs)
+    # visitor = lifted_obj.verboseVisitor(100)
+    solver_ehc = lifted_obj.liftedMulticutGreedyAdditiveFactory().create(lifted_obj)
+    node_labels = solver_ehc.optimize()
+    solver_kl = lifted_obj.liftedMulticutKernighanLinFactory().create(lifted_obj)
+    node_labels = solver_kl.optimize(node_labels)
+    return node_labels
+
+
+def probs_to_costs(probs, beta=.5):
+    p_min = 0.001
+    p_max = 1. - p_min
+    costs = (p_max - p_min) * probs + p_min
+    # probabilities to energies, second term is boundary bias
+    costs = np.log((1. - costs) / costs) + np.log((1. - beta) / beta)
+    return costs
+
+
+clas
