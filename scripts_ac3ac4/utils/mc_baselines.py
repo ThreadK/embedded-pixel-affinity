@@ -68,4 +68,22 @@ def superpixel_stacked_from_affinities(affinities, sp2d_fu, n_threads):
     return segmentation, segmentation.max()
 
 
-def multicut(n_nodes, uvs, costs, time_limit=
+def multicut(n_nodes, uvs, costs, time_limit=None):
+    graph = nifty.graph.UndirectedGraph(n_nodes)
+    graph.insertEdges(uvs)
+    obj = nmc.multicutObjective(graph, costs)
+    solver = obj.kernighanLinFactory(warmStartGreedy=True).create(obj)
+    if time_limit is not None:
+        visitor = obj.verboseVisitor(visitNth=100000000, timeLimitSolver=time_limit)
+        node_labels = solver.optimize(visitor=visitor)
+    else:
+        node_labels = solver.optimize()
+    return node_labels
+
+
+def lifted_multicut(n_nodes, local_uvs, local_costs, lifted_uvs, lifted_costs, time_limit=None):
+    graph = nifty.graph.UndirectedGraph(n_nodes)
+    graph.insertEdges(local_uvs)
+
+    lifted_obj = nlmc.liftedMulticutObjective(graph)
+    lifted_obj.setCosts(local_
