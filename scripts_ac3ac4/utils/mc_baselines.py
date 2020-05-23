@@ -124,4 +124,21 @@ class WatershedBase(object):
 class McSuperpixel(WatershedBase):
     def __init__(self, beta=.5, min_segment_size=0, stacked_2d=False, n_threads=1):
         self.beta = beta
-        self.
+        self.min_segment_size = min_segment_size
+        self.stacked_2d = stacked_2d
+        self.n_threads = n_threads
+
+    def mc_superpixel(self, affinities):
+        shape = affinities.shape[1:]
+        grid_graph = nifty.graph.undirectedGridGraph(shape)
+        costs = grid_graph.affinitiesToEdgeMap(affinities)
+        assert len(costs) == grid_graph.numberOfEdges
+        costs = probs_to_costs(costs, beta=self.beta)
+        segmentation = multicut(
+            grid_graph.numberOfNodes,
+            grid_graph.uvIds(),
+            costs
+        ).reshape(shape)
+        if self.min_segment_size > 0:
+            affinities = np.sum(affinities, axis=0)
+            segmentation, max_label = siz
