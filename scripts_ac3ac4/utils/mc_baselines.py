@@ -105,4 +105,23 @@ def probs_to_costs(probs, beta=.5):
     return costs
 
 
-clas
+class WatershedBase(object):
+    def __init__(self, grower):
+        # check that this is callable
+        self.grower = grower
+
+    def __call__(self, affinities):
+        return self.grower(affinities)
+
+    @staticmethod
+    def get_2d_from_3d_offsets(offsets):
+        # only keep in-plane channels
+        keep_channels = [ii for ii, off in enumerate(offsets) if off[0] == 0]
+        offsets = [off[1:] for ii, off in enumerate(offsets) if ii in keep_channels]
+        return keep_channels, offsets
+
+
+class McSuperpixel(WatershedBase):
+    def __init__(self, beta=.5, min_segment_size=0, stacked_2d=False, n_threads=1):
+        self.beta = beta
+        self.
