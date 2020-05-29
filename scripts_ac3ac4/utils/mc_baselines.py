@@ -141,4 +141,20 @@ class McSuperpixel(WatershedBase):
         ).reshape(shape)
         if self.min_segment_size > 0:
             affinities = np.sum(affinities, axis=0)
-            segmentation, max_label = siz
+            segmentation, max_label = size_filter(affinities, segmentation, self.min_segment_size)
+        else:
+            max_label = segmentation.max()
+        return segmentation, max_label
+
+    def __call__(self, affinities):
+        if self.stacked_2d:
+            assert affinities.shape[0] >= 3
+            affinities_ = np.require(affinities[1:3], requirements='C')
+            segmentation, _ = superpixel_stacked_from_affinities(affinities_, self.mc_superpixel, self.n_threads)
+
+        else:
+            if affinities.shape[0] > 3:
+                affinities_ = np.require(affinities[:3], requirements='C')
+            else:
+                affinities_ = affinities
+            segmentation, _ = self.mc_supe
