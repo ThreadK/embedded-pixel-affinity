@@ -157,4 +157,25 @@ class McSuperpixel(WatershedBase):
                 affinities_ = np.require(affinities[:3], requirements='C')
             else:
                 affinities_ = affinities
-            segmentation, _ = self.mc_supe
+            segmentation, _ = self.mc_superpixel(affinities_)
+        return segmentation
+
+
+class LongRangeMulticutSuperpixel(WatershedBase):
+    def __init__(self,
+                 offsets,
+                 beta=.5,
+                 only_repulsive_lr=False,
+                 min_segment_size=0,
+                 stacked_2d=False,
+                 n_threads=1):
+        self.stacked_2d = stacked_2d
+        assert isinstance(offsets, list)
+        if self.stacked_2d:
+            self.keep_channels, self.offsets = self.get_2d_from_3d_offsets(offsets)
+        else:
+            self.offsets = offsets
+        self.beta = beta
+        self.min_segment_size = min_segment_size
+        self.only_repulsive_lr = only_repulsive_lr
+        self.n_threads
