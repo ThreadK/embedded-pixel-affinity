@@ -210,4 +210,18 @@ class LongRangeMulticutSuperpixel(WatershedBase):
             y = lr_edge_mask
             final_mask = np.logical_not(np.logical_xor(y, np.logical_and(x, y)))
             uvs = uvs[final_mask]
-            costs = costs[fi
+            costs = costs[final_mask]
+
+        # FIXME this should be the other way round, but I am suffering from the usual confusion with the sign
+        costs = probs_to_costs(costs, beta=self.beta)
+        assert len(costs) == len(uvs)
+        assert uvs.shape[1] == 2
+        assert uvs.max() + 1 == grid_graph.numberOfNodes, "%i, %i" % (uvs.max(), grid_graph.numberOfNodes)
+
+        segmentation = multicut(grid_graph.numberOfNodes, uvs, costs).reshape(shape)
+        if self.min_segment_size > 0:
+            affinities_ = np.sum(affinities, axis=0)
+            segmentation, max_label = size_filter(affinities_, segmentation, self.min_segment_size)
+        else:
+            max_label = segmentation.max()
+        return se
