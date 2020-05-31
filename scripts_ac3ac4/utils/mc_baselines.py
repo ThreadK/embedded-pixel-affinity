@@ -224,4 +224,21 @@ class LongRangeMulticutSuperpixel(WatershedBase):
             segmentation, max_label = size_filter(affinities_, segmentation, self.min_segment_size)
         else:
             max_label = segmentation.max()
-        return se
+        return segmentation, max_label
+
+    def __call__(self, affinities):
+        assert affinities.shape[0] == len(self.offsets), "%i, %i" % (affinities.shape[0], len(self.offsets))
+        if self.stacked_2d:
+            affinities_ = np.require(affinities[self.keep_channels], requirements='C')
+            segmentation, _ = superpixel_stacked_from_affinities(affinities_, self.lr_mc_superpixel, self.n_threads)
+
+        else:
+            segmentation, _ = self.lr_mc_superpixel(affinities)
+        return segmentation
+
+
+class LmcSuperpixel(WatershedBase):
+    def __init__(self, offsets,
+                 beta=.5, beta_lifted=.5,
+                 cost_weight=1., min_segment_size=0,
+   
