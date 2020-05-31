@@ -178,4 +178,20 @@ class LongRangeMulticutSuperpixel(WatershedBase):
         self.beta = beta
         self.min_segment_size = min_segment_size
         self.only_repulsive_lr = only_repulsive_lr
-        self.n_threads
+        self.n_threads = n_threads
+
+    def lr_mc_superpixel(self, affinities):
+        shape = affinities.shape[1:]
+        grid_graph = nifty.graph.undirectedGridGraph(shape)
+        edge_map = grid_graph.liftedProblemFromLongRangeAffinities(affinities,
+                                                                   self.offsets)
+        uvs = np.array([key for key in edge_map.keys()], dtype='uint32')
+        costs = np.array([val for val in edge_map.values()], dtype='float64')
+
+        # filter out the long range non-repulsive edges
+        if self.only_repulsive_lr:
+            print("Only repulsive")
+            assert self.beta == .5
+            local_uvs = grid_graph.uvIds()
+            # compare to local connectivity
+  
