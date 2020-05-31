@@ -194,4 +194,20 @@ class LongRangeMulticutSuperpixel(WatershedBase):
             assert self.beta == .5
             local_uvs = grid_graph.uvIds()
             # compare to local connectivity
-  
+            local_lr_edges = find_matching_row_indices(uvs, local_uvs)[:, 0]
+            assert len(local_lr_edges) == len(local_uvs)
+
+            # invert indices to get the mask only containing long range edges
+            lr_edge_mask = np.ones(len(uvs), dtype='bool')
+            lr_edge_mask[local_lr_edges] = False
+
+            # mask for repulsive edges
+            repulsive_mask = costs > .5
+            assert len(repulsive_mask) == len(lr_edge_mask)
+
+            # FIXME thsi shouldn't be so complicated...
+            x = repulsive_mask
+            y = lr_edge_mask
+            final_mask = np.logical_not(np.logical_xor(y, np.logical_and(x, y)))
+            uvs = uvs[final_mask]
+            costs = costs[fi
