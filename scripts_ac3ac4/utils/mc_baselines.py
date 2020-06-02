@@ -269,4 +269,17 @@ class LmcSuperpixel(WatershedBase):
         # find edges of the local connectivity in our uvs
         local_edges = find_matching_row_indices(uvs, local_uvs)[:, 0]
         assert len(local_edges) == len(local_uvs)
-        # inver
+        # invert indices to get the mask only containing long range edges
+        lr_edge_mask = np.ones(len(uvs), dtype='bool')
+        lr_edge_mask[local_edges] = False
+        # split into local and lifted
+        lifted_uvs = uvs[lr_edge_mask]
+        lifted_costs = probs_to_costs(costs[lr_edge_mask], beta=self.beta_lifted)
+        local_costs = probs_to_costs(costs[local_edges], beta=self.beta_lifted)
+        # weight the local costs with lifted-to-local weight
+        local_costs *= self.cost_weight
+        segmentation = lifted_multicut(grid_graph.numberOfNodes,
+                                       local_uvs,
+                                       local_costs,
+                                       lifted_uvs,
+                          
