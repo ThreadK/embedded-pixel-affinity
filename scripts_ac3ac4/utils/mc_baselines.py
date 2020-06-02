@@ -256,4 +256,17 @@ class LmcSuperpixel(WatershedBase):
         self.min_segment_size = min_segment_size
         self.n_threads = n_threads
 
-    def lmc_superpixel(self, affinities, dim
+    def lmc_superpixel(self, affinities, dim):
+        shape = affinities.shape[1:]
+        grid_graph = nifty.graph.undirectedGridGraph(shape)
+        edge_map = grid_graph.liftedProblemFromLongRangeAffinities(affinities,
+                                                                   self.offsets)
+        uvs = np.array([key for key in edge_map.keys()] , dtype='uint32')
+        costs = np.array([val for val in edge_map.values()], dtype='float64')
+
+        # split uv-ids and costs into local and lifted uv-ids
+        local_uvs = grid_graph.uvIds()
+        # find edges of the local connectivity in our uvs
+        local_edges = find_matching_row_indices(uvs, local_uvs)[:, 0]
+        assert len(local_edges) == len(local_uvs)
+        # inver
