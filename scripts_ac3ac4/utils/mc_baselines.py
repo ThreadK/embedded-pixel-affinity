@@ -241,4 +241,19 @@ class LmcSuperpixel(WatershedBase):
     def __init__(self, offsets,
                  beta=.5, beta_lifted=.5,
                  cost_weight=1., min_segment_size=0,
-   
+                 stacked_2d=False, n_threads=1):
+        self.stacked_2d = stacked_2d
+        # if we calculate stacked 2d superpixels from 3d affinity
+        # maps, we must adjust the offsets by excludig all offsets
+        # with z coordinates and make the rest 2d
+        if self.stacked_2d:
+            self.keep_channels, self.offsets = self.get_2d_from_3d_offsets(offsets)
+        else:
+            self.offsets = offsets
+        self.beta = beta
+        self.beta_lifted = beta_lifted
+        self.cost_weight = cost_weight
+        self.min_segment_size = min_segment_size
+        self.n_threads = n_threads
+
+    def lmc_superpixel(self, affinities, dim
