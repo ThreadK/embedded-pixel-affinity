@@ -295,4 +295,7 @@ class LmcSuperpixel(WatershedBase):
             affinities_ = np.require(affinities[self.keep_channels], requirements='C')
             segmentation, _ = superpixel_stacked_from_affinities(affinities_,
                                                                  partial(self.lmc_superpixel, dim=2),
-                                              
+                                                                 self.n_threads)
+        else:
+            segmentation, _ = self.lmc_superpixel(affinities, dim=3)
+        return segmentation
