@@ -282,4 +282,17 @@ class LmcSuperpixel(WatershedBase):
                                        local_uvs,
                                        local_costs,
                                        lifted_uvs,
-                          
+                                       lifted_costs).reshape(shape)
+        if self.min_segment_size > 0:
+            hmap = np.sum(affinities[:dim], axis=0) / dim
+            segmentation, max_label = size_filter(hmap, segmentation, self.min_segment_size)
+        else:
+            max_label = segmentation.max()
+        return segmentation, max_label
+
+    def __call__(self, affinities):
+        if self.stacked_2d:
+            affinities_ = np.require(affinities[self.keep_channels], requirements='C')
+            segmentation, _ = superpixel_stacked_from_affinities(affinities_,
+                                                                 partial(self.lmc_superpixel, dim=2),
+                                              
