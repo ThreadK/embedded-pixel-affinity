@@ -71,4 +71,22 @@ class Compose(object):
             self.sample_size = self.sample_size + (2 * np.array(t.sample_params['add']))
         print('Sample size required for the augmentor:', self.sample_size)
 
-    def smooth_edge(s
+    def smooth_edge(self, data):
+        smoothed_label = data['label'].copy()
+
+        for z in range(smoothed_label.shape[0]):
+            temp = smoothed_label[z].copy()
+            for idx in np.unique(temp):
+                if idx != 0:
+                    binary = (temp==idx).astype(np.uint8)
+                    for _ in range(2):
+                        binary = dilation(binary)
+                        binary = gaussian(binary, sigma=2, preserve_range=True)
+                        binary = dilation(binary)
+                        binary = (binary > 0.8).astype(np.uint8)
+            
+                    temp[np.where(temp==idx)]=0
+                    temp[np.where(binary==1)]=idx
+            smoothed_label[z] = temp
+
+   
