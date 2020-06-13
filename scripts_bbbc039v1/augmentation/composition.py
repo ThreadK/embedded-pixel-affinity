@@ -36,4 +36,21 @@ class Compose(object):
                  input_size = (8,256,256),
                  smooth = True,
                  keep_uncropped = False,
-                 keep_non_s
+                 keep_non_smoothed = False):
+
+        self.transforms = transforms
+        self.set_flip()
+
+        self.input_size = np.array(input_size)
+        self.sample_size = self.input_size.copy()
+        self.set_sample_params()
+
+        self.smooth = smooth
+        self.keep_uncropped = keep_uncropped
+        self.keep_non_smoothed = keep_non_smoothed
+
+    def set_flip(self):
+        # Some data augmentation techniques (e.g., elastic wrap, missing parts) are designed only
+        # for x-y planes while some (e.g., missing section, mis-alignment) are only applied along
+        # the z axis. Thus we let flip augmentation the last one to be applied otherwise shape mis-match
+        # c
