@@ -53,4 +53,22 @@ class Compose(object):
         # Some data augmentation techniques (e.g., elastic wrap, missing parts) are designed only
         # for x-y planes while some (e.g., missing section, mis-alignment) are only applied along
         # the z axis. Thus we let flip augmentation the last one to be applied otherwise shape mis-match
-        # c
+        # can happen when do_ztrans is 1 for cubic input volumes.
+        self.flip_aug = None
+        flip_idx = None
+
+        for i, t in enumerate(self.transforms):
+            if t.__class__.__name__ == 'Flip':
+                self.flip_aug = t
+                flip_idx = i
+
+        if flip_idx is not None:
+            del self.transforms[flip_idx]
+
+    def set_sample_params(self):
+        for _, t in enumerate(self.transforms):
+            self.sample_size = np.ceil(self.sample_size * t.sample_params['ratio']).astype(int)
+            self.sample_size = self.sample_size + (2 * np.array(t.sample_params['add']))
+        print('Sample size required for the augmentor:', self.sample_size)
+
+    def smooth_edge(s
