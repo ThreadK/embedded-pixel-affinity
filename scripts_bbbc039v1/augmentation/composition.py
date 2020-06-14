@@ -89,4 +89,24 @@ class Compose(object):
                     temp[np.where(binary==1)]=idx
             smoothed_label[z] = temp
 
-   
+        data['label'] = smoothed_label
+        return data
+
+    def crop(self, data):
+        image, label = data['image'], data['label']
+
+        assert image.shape[-3:] == label.shape
+        assert image.ndim == 3 or image.ndim == 4
+        margin = (label.shape[1] - self.input_size[1]) // 2
+        margin = int(margin)
+        
+        # whether need to crop z or not (missing section augmentation)
+        if label.shape[0] > self.input_size[0]:
+            z_low = np.random.choice(label.shape[0]-self.input_size[0]+1, 1)[0]
+        else:
+            z_low = 0
+        z_high = z_low + self.input_size[0] 
+        z_low, z_high = int(z_low), int(z_high)
+
+        if margin==0: # no need for x,y crop
+    
