@@ -109,4 +109,16 @@ class Compose(object):
         z_low, z_high = int(z_low), int(z_high)
 
         if margin==0: # no need for x,y crop
-    
+            return {'image': image[z_low:z_high], 'label': label[z_low:z_high]}
+        else:    
+            low = margin
+            high = margin + self.input_size[1]
+            if image.ndim == 3:
+                if self.keep_uncropped == True:
+                    return {'image': image[z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high],
+                            'image_uncropped': image,
+                            'label_uncropped': label}               
+                else:
+                    return {'image': image[z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:h
