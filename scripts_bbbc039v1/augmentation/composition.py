@@ -121,4 +121,16 @@ class Compose(object):
                             'label_uncropped': label}               
                 else:
                     return {'image': image[z_low:z_high, low:high, low:high],
-                            'label': label[z_low:z_high, low:high, low:h
+                            'label': label[z_low:z_high, low:high, low:high]}
+            else:
+                if self.keep_uncropped == True:
+                    return {'image': image[:, z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high],
+                            'image_uncropped': image,
+                            'label_uncropped': label}
+                else:
+                    return {'image': image[:, z_low:z_high, low:high, low:high],
+                            'label': label[z_low:z_high, low:high, low:high]}                                        
+
+    def __call__(self, data, random_state=np.random.RandomState()):
+        # According thie blog post (https://www.sicara.ai/blog/2019-01-28-how-computer
