@@ -149,4 +149,14 @@ class Compose(object):
             data['uncropped_label'] = data['label']
         data = self.crop(data)
 
-      
+        # flip augmentation
+        if self.flip_aug is not None:
+            if random_state.rand() < self.flip_aug.p:
+                data = self.flip_aug(data, random_state)
+
+        if self.keep_non_smoothed:
+            data['non_smoothed'] = data['label']
+
+        if self.smooth:
+            data = self.smooth_edge(data)
+        return data
