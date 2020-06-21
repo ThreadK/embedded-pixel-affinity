@@ -133,4 +133,20 @@ class Compose(object):
                             'label': label[z_low:z_high, low:high, low:high]}                                        
 
     def __call__(self, data, random_state=np.random.RandomState()):
-        # According thie blog post (https://www.sicara.ai/blog/2019-01-28-how-computer
+        # According thie blog post (https://www.sicara.ai/blog/2019-01-28-how-computer-generate-random-numbers):
+        # we need to be careful when using numpy.random in multiprocess application as it can always generate the 
+        # same output for different processes. Therefore we use np.random.RandomState().
+        data['image'] = data['image'].astype(np.float32)
+
+        ran = random_state.rand(len(self.transforms))
+        for tid, t in enumerate(reversed(self.transforms)):
+            if ran[tid] < t.p:
+                data = t(data, random_state)
+
+        # crop the data to input size
+        if self.keep_uncropped:
+            data['uncropped_image'] = data['image']
+            data['uncropped_label'] = data['label']
+        data = self.crop(data)
+
+      
