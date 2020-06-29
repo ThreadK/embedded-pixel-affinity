@@ -22,4 +22,27 @@ class Grayscale(DataAugment):
         self.CONTRAST_FACTOR   = contrast_factor
         self.BRIGHTNESS_FACTOR = brightness_factor
 
-    def set_params(s
+    def set_params(self):
+        # No change in sample size
+        pass
+
+    def __call__(self, data, random_state=np.random):
+
+        if self.mode == 'mix':
+            mode = '3D' if random_state.rand() > 0.5 else '2D'
+        else:
+            mode = self.mode
+
+        # apply augmentations  
+        if mode == '2D': 
+            data = self._augment2D(data, random_state)
+        if mode == '3D': 
+            data = self._augment3D(data, random_state)
+        return data
+
+    def _augment2D(self, data, random_state=np.random):
+        """
+        Adapted from ELEKTRONN (http://elektronn.org/).
+        """
+        imgs = data['image']
+        transformedimgs
