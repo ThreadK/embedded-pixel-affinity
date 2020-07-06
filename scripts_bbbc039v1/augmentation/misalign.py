@@ -44,4 +44,17 @@ class MisAlignment(DataAugment):
             # slip misalignment
             new_images = images[:, y0:y0+out_shape[1], x0:x0+out_shape[2]]
             new_labels = labels[:, y0:y0+out_shape[1], x0:x0+out_shape[2]]
-            new_images[idx] = im
+            new_images[idx] = images[idx, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+            new_labels[idx] = labels[idx, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+        else:
+            # translation misalignment
+            new_images[:idx] = images[:idx, y0:y0+out_shape[1], x0:x0+out_shape[2]]
+            new_labels[:idx] = labels[:idx, y0:y0+out_shape[1], x0:x0+out_shape[2]]
+            new_images[idx:] = images[idx:, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+            new_labels[idx:] = labels[idx:, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+    
+        return new_images, new_labels
+
+    def misalignment_rotate(self, data, random_state):
+        images = data['image'].copy()
+        labels = 
