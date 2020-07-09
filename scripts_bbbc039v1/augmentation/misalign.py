@@ -57,4 +57,18 @@ class MisAlignment(DataAugment):
 
     def misalignment_rotate(self, data, random_state):
         images = data['image'].copy()
-        labels = 
+        labels = data['label'].copy()
+
+        height, width = images.shape[-2:]
+        assert height == width
+        M = self.random_rotate_matrix(height, random_state)
+        idx = random_state.choice(np.array(range(1, images.shape[0]-1)), 1)[0]
+
+        if random_state.rand() < 0.5:
+            # slip misalignment
+            images[idx] = cv2.warpAffine(images[idx], M, (height,width), 1.0, 
+                    flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+            labels[idx] = cv2.warpAffine(labels[idx], M, (height,width), 1.0, 
+                    flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT)
+        else:
+            # translation misalig
