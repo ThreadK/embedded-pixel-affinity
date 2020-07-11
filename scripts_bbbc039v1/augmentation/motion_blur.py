@@ -24,4 +24,19 @@ class MotionBlur(DataAugment):
 
     def motion_blur(self, data, random_state):
         images = data['image'].copy()
-        l
+        labels = data['label'].copy()
+
+        # generating the kernel
+        kernel_motion_blur = np.zeros((self.size, self.size))
+        if random.random() > 0.5: # horizontal kernel
+            kernel_motion_blur[int((self.size-1)/2), :] = np.ones(self.size)
+        else: # vertical kernel
+            kernel_motion_blur[:, int((self.size-1)/2)] = np.ones(self.size)
+        kernel_motion_blur = kernel_motion_blur / self.size
+
+        k = min(self.sections, images.shape[0])
+        selected_idx = np.random.choice(images.shape[0], k, replace=True)
+
+        for idx in selected_idx:
+            # applying the kernel to the input image
+            images[idx] = cv2.filter2D(images[
