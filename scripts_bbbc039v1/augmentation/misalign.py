@@ -87,4 +87,13 @@ class MisAlignment(DataAugment):
         x = (self.displacement / 2.0)
         y = ((height - self.displacement) / 2.0) * 1.42
         angle = math.asin(x/y) * 2.0 * 57.2958 # convert radians to degrees
-        rand_angle = (rand
+        rand_angle = (random_state.rand() - 0.5) * 2.0 * angle
+        M = cv2.getRotationMatrix2D((height/2, height/2), rand_angle, 1)
+        return M
+
+    def __call__(self, data, random_state=np.random):
+        if random_state.rand() < self.rotate_ratio:
+            new_images, new_labels = self.misalignment_rotate(data, random_state)
+        else:
+            new_images, new_labels = self.misalignment(data, random_state)
+        return {'image': new_images, 'label': new_labels}
