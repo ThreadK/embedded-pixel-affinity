@@ -14,4 +14,24 @@ class Rescale(DataAugment):
         fix_aspect (bool): fix aspect ratio or not. Default: False
         p (float): probability of applying the augmentation. Default: 0.5
     """
-    def __init__(se
+    def __init__(self, low=0.8, high=1.2, fix_aspect=False, p=0.5):
+        super(Rescale, self).__init__(p=p) 
+        self.low = low
+        self.high = high
+        self.fix_aspect = fix_aspect
+
+        self.image_interpolation = 1
+        self.label_interpolation = 0
+        self.set_params()
+
+    def set_params(self):
+        assert (self.low >= 0.5)
+        assert (self.low <= 1.0)
+        ratio = 1.0 / self.low
+        self.sample_params['ratio'] = [1.0, ratio, ratio]
+
+    def random_scale(self, random_state):
+        rand_scale = random_state.rand() * (self.high - self.low) + self.low
+        return rand_scale
+
+    def apply_rescale(self, image, la
