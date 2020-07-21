@@ -61,4 +61,15 @@ class Rescale(DataAugment):
             x0 = int(np.floor((x_length - image.shape[1]) / 2))
             x1 = int(np.ceil((x_length - image.shape[1]) / 2))
             transformed_image = np.pad(transformed_image, ((0, 0),(x0, x1)), mode='constant')
-            transformed_label = np.pad(transfo
+            transformed_label = np.pad(transformed_label, ((0, 0),(x0, x1)), mode='constant')
+
+        output_image = resize(transformed_image, image.shape, order=self.image_interpolation, mode='constant', cval=0, 
+                              clip=True, preserve_range=True, anti_aliasing=True)
+        output_label = resize(transformed_label, image.shape, order=self.label_interpolation, mode='constant', cval=0, 
+                              clip=True, preserve_range=True, anti_aliasing=False)  
+        return output_image, output_label
+
+    def __call__(self, data, random_state=np.random):
+
+        if 'label' in data and data['label'] is not None:
+            image, label = data['image'], data['label'
