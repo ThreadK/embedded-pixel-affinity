@@ -72,4 +72,18 @@ class Rescale(DataAugment):
     def __call__(self, data, random_state=np.random):
 
         if 'label' in data and data['label'] is not None:
-            image, label = data['image'], data['label'
+            image, label = data['image'], data['label']
+        else:
+            image, label = data['image'], None
+
+        if self.fix_aspect:
+            sf_x = self.random_scale(random_state)
+            sf_y = sf_x
+        else:
+            sf_x = self.random_scale(random_state)
+            sf_y = self.random_scale(random_state)
+
+        output = {}
+        output['image'], output['label'] = self.apply_rescale(image, label, sf_x, sf_y, random_state)
+
+        return output
