@@ -25,4 +25,21 @@ class Rotate(DataAugment):
 
     def rotate(self, imgs, M, interpolation):
         height, width = imgs.shape[-2:]
-        transformedimgs = cv2.warpAffine(imgs, M ,(height,width), 1.0, flags=interpolation, bor
+        transformedimgs = cv2.warpAffine(imgs, M ,(height,width), 1.0, flags=interpolation, borderMode=self.border_mode)
+        # transformedimgs = np.copy(imgs)
+        # for z in range(transformedimgs.shape[-3]):
+        #     img = transformedimgs[z, :, :]
+        #     dst = cv2.warpAffine(img, M ,(height,width), 1.0, flags=interpolation, borderMode=self.border_mode)
+        #     transformedimgs[z, :, :] = dst
+
+        return transformedimgs
+
+    def __call__(self, data, random_state=np.random):
+
+        if 'label' in data and data['label'] is not None:
+            image, label = data['image'], data['label']
+        else:
+            image, label = data['image'], None
+
+        height, width = image.shape[-2:]
+        M = cv2.getRotationMatrix2D((height/2, width/
