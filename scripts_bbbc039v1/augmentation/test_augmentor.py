@@ -42,4 +42,25 @@ class TestAugmentor(object):
             if xflip:
                 volume = torch.flip(volume, [4])
             if yflip:
-                volume = torch.flip(volum
+                volume = torch.flip(volume, [3])
+            if zflip:
+                volume = torch.flip(volume, [2])
+            if transpose:
+                volume = torch.transpose(volume, 3, 4)
+            # aff: 3*z*y*x 
+            vout = model(volume).detach().cpu()
+
+            if transpose: # swap x-/y-affinity
+                vout = torch.transpose(vout, 3, 4)
+            if zflip:
+                vout = torch.flip(vout, [2])
+            if yflip:
+                vout = torch.flip(vout, [3])
+            if xflip:
+                vout = torch.flip(vout, [4])
+                
+            # cast to numpy array
+            vout = vout.numpy()
+            if out is None:
+                if self.mode == 'min':
+                    out = np.ones(vout.shape, dtype=
