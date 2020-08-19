@@ -21,4 +21,20 @@ class MisAlignment(DataAugment):
 
     def set_params(self):
         self.sample_params['add'] = [0, 
-                                     int(math.ce
+                                     int(math.ceil(self.displacement / 2.0)), 
+                                     int(math.ceil(self.displacement / 2.0))]
+
+    def misalignment(self, data, random_state):
+        images = data['image'].copy()
+        labels = data['label'].copy()
+
+        out_shape = (images.shape[0], 
+                     images.shape[1]-self.displacement, 
+                     images.shape[2]-self.displacement)    
+        new_images = np.zeros(out_shape, images.dtype)
+        new_labels = np.zeros(out_shape, labels.dtype)
+
+        x0 = random_state.randint(self.displacement)
+        y0 = random_state.randint(self.displacement)
+        x1 = random_state.randint(self.displacement)
+  
