@@ -48,4 +48,21 @@ class Flip(DataAugment):
             # x reflection.
             if rule[2]:
                 data = data[:, :, :, ::-1]
-            
+            # Transpose in xy.
+            if rule[3]:
+                data = data.transpose(0, 1, 3, 2)
+            # Transpose in xz.
+            if self.do_ztrans==1 and rule[4]:
+                data = data.transpose(0, 3, 2, 1)
+        return data
+    
+    def __call__(self, data, random_state=np.random):
+        output = {}
+
+        rule = random_state.randint(2, size=4+self.do_ztrans)
+        augmented_image = self.flip_and_swap(data['image'], rule)
+        augmented_label = self.flip_and_swap(data['label'], rule)
+        output['image'] = augmented_image
+        output['label'] = augmented_label
+
+        return output
