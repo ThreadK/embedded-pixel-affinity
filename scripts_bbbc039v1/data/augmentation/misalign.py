@@ -49,4 +49,20 @@ class MisAlignment(DataAugment):
         else:
             # translation misalignment
             new_images[:idx] = images[:idx, y0:y0+out_shape[1], x0:x0+out_shape[2]]
-            new_labels[:idx] = labels[:i
+            new_labels[:idx] = labels[:idx, y0:y0+out_shape[1], x0:x0+out_shape[2]]
+            new_images[idx:] = images[idx:, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+            new_labels[idx:] = labels[idx:, y1:y1+out_shape[1], x1:x1+out_shape[2]]
+    
+        return new_images, new_labels
+
+    def misalignment_rotate(self, data, random_state):
+        images = data['image'].copy()
+        labels = data['label'].copy()
+
+        height, width = images.shape[-2:]
+        assert height == width
+        M = self.random_rotate_matrix(height, random_state)
+        idx = random_state.choice(np.array(range(1, images.shape[0]-1)), 1)[0]
+
+        if random_state.rand() < 0.5:
+            # slip misali
