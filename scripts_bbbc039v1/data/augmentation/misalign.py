@@ -65,4 +65,15 @@ class MisAlignment(DataAugment):
         idx = random_state.choice(np.array(range(1, images.shape[0]-1)), 1)[0]
 
         if random_state.rand() < 0.5:
-            # slip misali
+            # slip misalignment
+            images[idx] = cv2.warpAffine(images[idx], M, (height,width), 1.0, 
+                    flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+            labels[idx] = cv2.warpAffine(labels[idx], M, (height,width), 1.0, 
+                    flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT)
+        else:
+            # translation misalignment
+            for i in range(idx, images.shape[0]):
+                images[i] = cv2.warpAffine(images[i], M, (height,width), 1.0, 
+                    flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+                labels[i] = cv2.warpAffine(labels[i], M, (height,width), 1.0, 
+               
