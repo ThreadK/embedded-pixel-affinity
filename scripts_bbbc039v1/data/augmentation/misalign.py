@@ -93,4 +93,7 @@ class MisAlignment(DataAugment):
 
     def __call__(self, data, random_state=np.random):
         if random_state.rand() < self.rotate_ratio:
-            new_images, new_labels = self.misalignment_rotate(data, rando
+            new_images, new_labels = self.misalignment_rotate(data, random_state)
+        else:
+            new_images, new_labels = self.misalignment(data, random_state)
+        return {'image': new_images, 'label': new_labels}
