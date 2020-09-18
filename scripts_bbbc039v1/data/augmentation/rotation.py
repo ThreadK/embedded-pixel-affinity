@@ -38,4 +38,14 @@ class Rotate(DataAugment):
         if 'label' in data and data['label'] is not None:
             image, label = data['image'], data['label']
         else:
-            image, label = 
+            image, label = data['image'], None
+
+        height, width = image.shape[-2:]
+        M = cv2.getRotationMatrix2D((height/2, width/2), random_state.rand()*360.0, 1)
+
+        output = {}
+        output['image'] = self.rotate(image, M, self.image_interpolation)
+        if label is not None:
+            output['label'] = self.rotate(label, M, self.label_interpolation)
+
+        return output
