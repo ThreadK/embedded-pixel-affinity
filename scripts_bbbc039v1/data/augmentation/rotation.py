@@ -17,4 +17,25 @@ class Rotate(DataAugment):
         self.image_interpolation = cv2.INTER_LINEAR
         self.label_interpolation = cv2.INTER_NEAREST
         self.border_mode = cv2.BORDER_CONSTANT
-        self.s
+        self.set_params()
+
+    def set_params(self):
+        # sqrt(2)
+        self.sample_params['ratio'] = [1.0, 1.42, 1.42]
+
+    def rotate(self, imgs, M, interpolation):
+        height, width = imgs.shape[-2:]
+        transformedimgs = np.copy(imgs)
+        for z in range(transformedimgs.shape[-3]):
+            img = transformedimgs[z, :, :]
+            dst = cv2.warpAffine(img, M ,(height,width), 1.0, flags=interpolation, borderMode=self.border_mode)
+            transformedimgs[z, :, :] = dst
+
+        return transformedimgs
+
+    def __call__(self, data, random_state=np.random):
+
+        if 'label' in data and data['label'] is not None:
+            image, label = data['image'], data['label']
+        else:
+            image, label = 
