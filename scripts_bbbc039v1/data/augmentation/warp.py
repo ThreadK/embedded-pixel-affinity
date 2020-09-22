@@ -43,4 +43,19 @@ class Elastic(DataAugment):
 
         height, width = image.shape[-2:] # (c, z, y, x)
 
-        dx = np.float32(gaussian_filter((random_state.rand(
+        dx = np.float32(gaussian_filter((random_state.rand(height, width) * 2 - 1), self.sigma) * self.alpha)
+        dy = np.float32(gaussian_filter((random_state.rand(height, width) * 2 - 1), self.sigma) * self.alpha)
+
+        x, y = np.meshgrid(np.arange(width), np.arange(height))
+        mapx, mapy = np.float32(x + dx), np.float32(y + dy)
+
+        output = {}
+        transformed_image = []
+        transformed_label = []
+
+        for i in range(image.shape[-3]):
+            if image.ndim == 3:
+                transformed_image.append(cv2.remap(image[i], mapx, mapy, 
+                                    self.image_interpolation, borderMode=self.border_mode))     
+            else:
+                temp = [cv2.remap(image[channel, i], mapx, mapy, self.image_interpolation,
