@@ -22,4 +22,25 @@ class Elastic(DataAugment):
                  alpha=10.0,
                  sigma=4.0,
                  p=0.5):
-      
+        
+        super(Elastic, self).__init__(p)
+        self.alpha = alpha
+        self.sigma = sigma
+        self.image_interpolation = cv2.INTER_LINEAR
+        self.label_interpolation = cv2.INTER_NEAREST
+        self.border_mode = cv2.BORDER_CONSTANT
+        self.set_params()
+
+    def set_params(self):
+        max_margin = int(self.alpha) + 1
+        self.sample_params['add'] = [0, max_margin, max_margin]
+
+    def __call__(self, data, random_state=np.random):
+        if 'label' in data and data['label'] is not None:
+            image, label = data['image'], data['label']
+        else:
+            image = data['image']  
+
+        height, width = image.shape[-2:] # (c, z, y, x)
+
+        dx = np.float32(gaussian_filter((random_state.rand(
