@@ -36,4 +36,22 @@ def mknhood3d(radius=1):
     i=i[idxkeep].ravel(); j=j[idxkeep].ravel(); k=k[idxkeep].ravel();
     zeroIdx = np.array(len(i) // 2).astype(np.int32);
 
-    nhood = np.vstack((k[:z
+    nhood = np.vstack((k[:zeroIdx],i[:zeroIdx],j[:zeroIdx])).T.astype(np.int32)
+    return np.ascontiguousarray(np.flipud(nhood))
+
+def mknhood3d_aniso(radiusxy=1,radiusxy_zminus1=1.8):
+    # Makes nhood structures for some most used dense graphs.
+    nhoodxyz = mknhood3d(radiusxy)
+    nhoodxy_zminus1 = mknhood2d(radiusxy_zminus1)
+    nhood = np.zeros((nhoodxyz.shape[0]+2*nhoodxy_zminus1.shape[0],3),dtype=np.int32)
+    nhood[:3,:3] = nhoodxyz
+    nhood[3:,0] = -1
+    nhood[3:,1:] = np.vstack((nhoodxy_zminus1,-nhoodxy_zminus1))
+
+    return np.ascontiguousarray(nhood)
+
+def seg_to_aff(seg, nhood=mknhood3d(1), pad='replicate'):
+    # constructs an affinity graph from a segmentation
+    # assume affinity graph is represented as:
+    # shape = (e, z, y, x)
+    # nh
