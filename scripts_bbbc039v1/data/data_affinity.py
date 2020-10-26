@@ -98,3 +98,5 @@ def seg_to_aff(seg, nhood=mknhood3d(1), pad='replicate'):
     elif nEdge==2 and pad == 'replicate': # pad the boundary affinity
         aff[0,0] = (seg[0]>0).astype(aff.dtype)
         aff[1,:,0] = (seg[:,0]>0).astype(aff.dtype)
+
+    return aff
