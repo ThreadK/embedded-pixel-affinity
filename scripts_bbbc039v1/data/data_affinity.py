@@ -86,4 +86,15 @@ def seg_to_aff(seg, nhood=mknhood3d(1), pad='replicate'):
                                 max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1])] == \
                              seg[max(0,nhood[e,0]):min(shape[0],shape[0]+nhood[e,0]), \
                                 max(0,nhood[e,1]):min(shape[1],shape[1]+nhood[e,1])] ) \
-                            * ( seg[max(0
+                            * ( seg[max(0,-nhood[e,0]):min(shape[0],shape[0]-nhood[e,0]), \
+                                max(0,-nhood[e,1]):min(shape[1],shape[1]-nhood[e,1])] > 0 ) \
+                            * ( seg[max(0,nhood[e,0]):min(shape[0],shape[0]+nhood[e,0]), \
+                                max(0,nhood[e,1]):min(shape[1],shape[1]+nhood[e,1])] > 0 )
+
+    if nEdge==3 and pad == 'replicate': # pad the boundary affinity
+        aff[0,0] = (seg[0]>0).astype(aff.dtype)
+        aff[1,:,0] = (seg[:,0]>0).astype(aff.dtype)
+        aff[2,:,:,0] = (seg[:,:,0]>0).astype(aff.dtype)
+    elif nEdge==2 and pad == 'replicate': # pad the boundary affinity
+        aff[0,0] = (seg[0]>0).astype(aff.dtype)
+        aff[1,:,0] = (seg[:,0]>0).astype(aff.dtype)
