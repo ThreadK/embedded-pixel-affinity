@@ -47,3 +47,14 @@ def remove_small(seg, thres=100):
 def im2col(A, BSZ, stepsize=1):
     # Parameters
     M,N = A.shape
+    # Get Starting block indices
+    start_idx = np.arange(0,M-BSZ[0]+1,stepsize)[:,None]*N + np.arange(0,N-BSZ[1]+1,stepsize)
+    # Get offsetted indices across the height and width of input array
+    offset_idx = np.arange(BSZ[0])[:,None]*N + np.arange(BSZ[1])
+    # Get all actual indices & index into input array for final output
+    return np.take(A,start_idx.ravel()[:,None] + offset_idx.ravel())
+
+def seg_widen_border(seg, tsz_h=1):
+    # Kisuk Lee's thesis (A.1.4): 
+    # "we preprocessed the ground truth seg such that any voxel centered on a 3 × 3 × 1 window containing 
+    # more than one positive segment ID (zero is reserved for background) is marked as background."
