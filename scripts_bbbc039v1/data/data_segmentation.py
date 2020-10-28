@@ -78,3 +78,22 @@ def seg_widen_border(seg, tsz_h=1):
         seg = seg * ((p0 == p1).reshape(sz))
     return seg
 
+def seg_to_small_seg(seg,thres=25,rr=2):
+    # rr: z/x-y resolution ratio
+    sz = seg.shape
+    mask = np.zeros(sz,np.uint8)
+    for z in np.where(seg.max(axis=1).max(axis=1)>0)[0]:
+        tmp = label_cc(seg[z])
+        ui,uc = np.unique(tmp,return_counts=True)
+        rl = np.zeros(ui[-1]+1,np.uint8)
+        rl[ui[uc<thres]]=1;rl[0]=0
+        mask[z] += rl[tmp]
+    for y in np.where(seg.max(axis=2).max(axis=0)>0)[0]:
+        tmp = label_cc(seg[:,y])
+        ui,uc = np.unique(tmp,return_counts=True)
+        rl = np.zeros(ui[-1]+1,np.uint8)
+        rl[ui[uc<thres//rr]]=1;rl[0]=0
+        mask[:,y] += rl[tmp]
+    for x in np.where(seg.max(axis=0).max(axis=0)>0)[0]:
+        tmp = label_cc(seg[:,:,x])
+        ui,u
