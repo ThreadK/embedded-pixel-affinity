@@ -58,3 +58,23 @@ def seg_widen_border(seg, tsz_h=1):
     # Kisuk Lee's thesis (A.1.4): 
     # "we preprocessed the ground truth seg such that any voxel centered on a 3 × 3 × 1 window containing 
     # more than one positive segment ID (zero is reserved for background) is marked as background."
+    # seg=0: background
+    tsz = 2*tsz_h+1
+    sz = seg.shape
+    if len(sz)==3:
+        for z in range(sz[0]):
+            mm = seg[z].max()
+            patch = im2col(np.pad(seg[z],((tsz_h,tsz_h),(tsz_h,tsz_h)),'reflect'),[tsz,tsz])
+            p0=patch.max(axis=1)
+            patch[patch==0] = mm+1
+            p1=patch.min(axis=1)
+            seg[z] =seg[z]*((p0==p1).reshape(sz[1:]))
+    else:
+        mm = seg.max()
+        patch = im2col(np.pad(seg,((tsz_h,tsz_h),(tsz_h,tsz_h)),'reflect'),[tsz,tsz])
+        p0 = patch.max(axis=1)
+        patch[patch == 0] = mm + 1
+        p1 = patch.min(axis = 1)
+        seg = seg * ((p0 == p1).reshape(sz))
+    return seg
+
