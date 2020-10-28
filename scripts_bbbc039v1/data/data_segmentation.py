@@ -96,4 +96,24 @@ def seg_to_small_seg(seg,thres=25,rr=2):
         mask[:,y] += rl[tmp]
     for x in np.where(seg.max(axis=0).max(axis=0)>0)[0]:
         tmp = label_cc(seg[:,:,x])
-        ui,u
+        ui,uc = np.unique(tmp,return_counts=True)
+        rl = np.zeros(ui[-1]+1,np.uint8)
+        rl[ui[uc<thres//rr]]=1;rl[0]=0
+        mask[:,:,x] += rl[tmp]
+    return mask
+
+def seg_to_instance_bd(seg, tsz_h=7, do_bg=False):
+    tsz = tsz_h*2+1
+    mm = seg.max()
+    sz = seg.shape
+    bd = np.zeros(sz, np.uint8)
+    for z in range(sz[0]):
+        patch = im2col(np.pad(seg[z], ((tsz_h,tsz_h),(tsz_h,tsz_h)),'reflect'),[tsz,tsz])
+        p0 = patch.max(axis=1)
+        if do_bg: # at least one non-zero seg
+            p1 = patch.min(axis=1)
+            bd[z] = ((p0>0)*(p0!=p1)).reshape(sz[1:])
+        else: # between two non-zero seg
+            patch[patch==0] = mm+1
+            p1 = patch.min(axis=1)
+            bd[z] = ((p0!=0)*(p1
