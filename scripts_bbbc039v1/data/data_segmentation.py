@@ -116,4 +116,22 @@ def seg_to_instance_bd(seg, tsz_h=7, do_bg=False):
         else: # between two non-zero seg
             patch[patch==0] = mm+1
             p1 = patch.min(axis=1)
-            bd[z] = ((p0!=0)*(p1
+            bd[z] = ((p0!=0)*(p1!=0)*(p0!=p1)).reshape(sz[1:])
+    return bd
+
+def markInvalid(seg, iter_num=2, do_2d=True):
+    # find invalid 
+    # if do erosion(seg==0), then miss the border
+    if do_2d:
+        stel=np.array([[1,1,1], [1,1,1]]).astype(bool)
+        if len(seg.shape)==2:
+            out = binary_dilation(seg>0, structure=stel, iterations=iter_num)
+            seg[out==0] = -1
+        else: # save memory
+            for z in range(seg.shape[0]):
+                tmp = seg[z] # by reference
+                out = binary_dilation(tmp>0, structure=stel, iterations=iter_num)
+                tmp[out==0] = -1
+    else:
+        stel=np.array([[1,1,1], [1,1,1], [1,1,1]]).astype(bool)
+        out = binary_dilation(seg>0, structure
