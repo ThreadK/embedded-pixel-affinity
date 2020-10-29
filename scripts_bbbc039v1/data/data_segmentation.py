@@ -134,4 +134,25 @@ def markInvalid(seg, iter_num=2, do_2d=True):
                 tmp[out==0] = -1
     else:
         stel=np.array([[1,1,1], [1,1,1], [1,1,1]]).astype(bool)
-        out = binary_dilation(seg>0, structure
+        out = binary_dilation(seg>0, structure=stel, iterations=iter_num)
+        seg[out==0] = -1
+    return seg
+
+def seg_to_weights(targets, wopts, mask=None):
+    # input: list of targets
+    out=[None]*len(wopts)
+    for wid, wopt in enumerate(wopts):
+        # 0: no weight
+        out[wid] = seg_to_weight(targets[wid], wopt, mask)
+    return out
+
+def seg_to_weight(target, wopts, mask=None):
+    out=[None]*len(wopts)
+    foo = np.zeros((1), int)
+    for wid, wopt in enumerate(wopts):
+        # 0: no weight
+        out[wid] = foo
+        if wopt == '1': # 1: by gt-target ratio 
+            out[wid] = weight_binary_ratio(target, mask)
+        elif wopt == '2': # 2: unet weight
+            out[wid] = wei
