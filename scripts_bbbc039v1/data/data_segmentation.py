@@ -155,4 +155,22 @@ def seg_to_weight(target, wopts, mask=None):
         if wopt == '1': # 1: by gt-target ratio 
             out[wid] = weight_binary_ratio(target, mask)
         elif wopt == '2': # 2: unet weight
-            out[wid] = wei
+            out[wid] = weight_unet3d(target)
+    return out
+
+def seg_to_targets(label, topts):
+    # input: (D, H, W)
+    # output: (C, D, H, W)
+    out = [None]*len(topts)
+    for tid, topt in enumerate(topts):
+        if topt[0] == '9': # generic segmantic segmentation
+            out[tid] = label.astype(np.int64)
+        elif topt == '0': # binary
+            out[tid] = (label>0)[None,:].astype(np.float32)
+        elif topt[0] == '1': # synaptic polarity:
+            tmp = [None]*3 
+            tmp[0] = np.logical_and((label % 2) == 1, label > 0)
+            tmp[1] = np.logical_and((label % 2) == 0, label > 0)
+            tmp[2] = (label > 0)
+            out[tid] = np.stack(tmp, 0).astype(np.float32)
+        elif topt[0] == '2': # a
