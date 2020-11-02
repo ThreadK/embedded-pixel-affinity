@@ -173,4 +173,17 @@ def seg_to_targets(label, topts):
             tmp[1] = np.logical_and((label % 2) == 0, label > 0)
             tmp[2] = (label > 0)
             out[tid] = np.stack(tmp, 0).astype(np.float32)
-        elif topt[0] == '2': # a
+        elif topt[0] == '2': # affinity
+            if label.ndim == 3: # 3d aff 
+                out[tid] = seg_to_aff(label)
+            elif label.ndim == 2: # 2d aff 
+                out[tid] = seg_to_aff(label, nhood=mknhood2d(1))
+            else:
+                raise ValueError('Undefined affinity computation for ndim = ' + str(label.ndim))
+        elif topt[0] == '3': # small object mask
+            # size_thres: 2d threshold for small size
+            # zratio: resolution ration between z and x/y
+            # mask_dsize: mask dilation size
+            _, size_thres, zratio, _ = [int(x) for x in topt.split('-')]
+            out[tid] = (seg_to_small_seg(label, size_thres, zratio)>0)[None,:].astype(np.float32)
+        elif topt[0] == '4': # instance
