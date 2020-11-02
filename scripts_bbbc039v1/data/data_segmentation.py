@@ -186,4 +186,21 @@ def seg_to_targets(label, topts):
             # mask_dsize: mask dilation size
             _, size_thres, zratio, _ = [int(x) for x in topt.split('-')]
             out[tid] = (seg_to_small_seg(label, size_thres, zratio)>0)[None,:].astype(np.float32)
-        elif topt[0] == '4': # instance
+        elif topt[0] == '4': # instance boundary mask
+            _, bd_sz,do_bg = [int(x) for x in topt.split('-')]
+            if label.ndim == 2:
+                out[tid] = seg_to_instance_bd(label[None,:], bd_sz, do_bg).astype(np.float32)
+            else:
+                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg)[None,:].astype(np.float32)
+        elif topt[0] == '5': # distance transform
+            if len(topt) == 1: 
+                topt = topt + '-2d'
+            mode = topt.split('-')
+            out[tid] = distance_transform_vol(label.copy(), mode=mode)
+        else:
+            raise NameError("Target option %s is not valid!" % topt[0])
+
+    return out
+
+def weight_binary_ratio(label, mask=None, alpha=1.0):
+    """Binary-class 
