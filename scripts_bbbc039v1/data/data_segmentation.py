@@ -220,3 +220,31 @@ def weight_binary_ratio(label, mask=None, alpha=1.0):
         if weight_factor > 0.5:
             weight = label + alpha*weight_factor/(1-weight_factor)*(1-label)
         else:
+            weight = alpha*(1-weight_factor)/weight_factor*label + (1-label)
+
+        if mask is not None:
+            weight = weight*mask
+
+    return weight.astype(np.float32)
+
+def weight_unet3d(seg, w0=10, sigma=5):
+    out = np.zeros_like(seg)
+    zid = np.where((seg>0).max(axis=1).max(axis=1)>0)[0]
+    for z in zid:
+        out[z] = weight_unet2d(seg[z], w0, sigma)
+    return out
+
+def weight_unet2d(seg, w0=10, sigma=5):
+    """
+    Generate the weight maps as specified in the UNet paper
+    for a multi-instance seg map.
+    
+    Parameters
+    ----------
+    seg: array-like
+        A 2D array of shape (image_height, image_width)
+
+    Returns
+    -------
+    array-like
+        A 2D array of shape (image_height, ima
