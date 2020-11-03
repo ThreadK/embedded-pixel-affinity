@@ -247,4 +247,20 @@ def weight_unet2d(seg, w0=10, sigma=5):
     Returns
     -------
     array-like
-        A 2D array of shape (image_height, ima
+        A 2D array of shape (image_height, image_width)
+    
+    """    
+    seg_ids = np.unique(seg)
+    seg_ids = seg_ids[seg_ids>0]
+    nrows, ncols = seg.shape    
+    distMap = np.ones((nrows * ncols, 2))*(nrows+ncols)
+    X1, Y1 = np.meshgrid(range(ncols), range(nrows))
+    X1, Y1 = X1.reshape(1,-1), Y1.reshape(1,-1)
+    for i, seg_id in enumerate(seg_ids):
+        # find the boundary of each mask,
+        # compute the distance of each pixel from this boundary
+        bounds = find_boundaries(seg==seg_id, mode='inner')
+        Y2, X2 = np.nonzero(bounds)
+        dist = np.sqrt((X2.reshape(-1,1) - X1) ** 2 + (Y2.reshape(-1,1) - Y1) ** 2).min(axis=0)
+        m1 = dist<distMap[:,0]
+        distMap[m1,1]
