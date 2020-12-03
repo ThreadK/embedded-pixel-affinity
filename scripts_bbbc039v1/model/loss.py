@@ -100,3 +100,48 @@ class DiceLoss(nn.Module):
         loss = total_loss/target.shape[1]
         # print(loss)
         return loss
+
+def MSE_loss(output,target):
+    loss_fn = nn.MSELoss()
+    loss = loss_fn(output, target)
+    return loss
+
+def BCE_loss(output,target,weight_rate=[1,1]):
+    # print("weight_rate",weight_rate)
+    weight = torch.FloatTensor([torch.sum(target == 1).item(), torch.sum(target == 0).item()]).cuda()
+
+    loss_fn = nn.CrossEntropyLoss(weight=weight)
+    # loss_fn = nn.BCELoss(weight=weight)
+    loss = loss_fn(output, target.squeeze(1).long())
+    return loss
+
+class WeightedBCE(nn.Module):
+    """Weighted binary cross-entropy.
+    """
+    def __init__(self, size_average=True, reduce=True):
+        super().__init__()
+        self.size_average = size_average
+        self.reduce = reduce
+
+    def forward(self, pred, target, weight=None):
+        #_assert_no_grad(target)
+        weight = torch.FloatTensor([torch.sum(target == 1).item(), torch.sum(target == 0).item()]).cuda()
+        return F.binary_cross_entropy(pred, target, weight)
+
+def frequency(target):
+    target = target.float()
+
+    pixels = target.view(-1).shape[0]
+    foreground = target.sum().float()
+    background = pixels - foreground
+    w1 = (1/foreground)
+    w0 = (1/background)
+    f0 = w0 / (w0 + w1)
+    f1 = w1 / (w0 + w1)
+    weight = torch.tensor([f0, f1])
+
+    return weight.cuda()
+
+
+
+
