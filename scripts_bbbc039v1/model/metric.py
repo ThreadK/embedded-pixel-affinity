@@ -56,4 +56,21 @@ class MeanIoU:
 
                 per_channel_iou.append(self._jaccard_index(binary_prediction[c], _target[c]))
 
-            assert per_channel_iou, "All channels were ignored from the computat
+            assert per_channel_iou, "All channels were ignored from the computation"
+            mean_iou = torch.mean(torch.tensor(per_channel_iou))
+            per_batch_iou.append(mean_iou)
+
+        return torch.mean(torch.tensor(per_batch_iou))
+
+    def _binarize_predictions(self, input, n_classes):
+        """
+        Puts 1 for the class/channel with the highest probability and 0 in other channels. Returns byte tensor of the
+        same size as the input tensor.
+        """
+        if n_classes == 1:
+            # for single channel input just threshold the probability map
+            result = input > 0.5
+            return result.long()
+
+        _, max_index = torch.max(input, dim=0, keepdim=True)
+        return torch.zeros_like(input, dtype=torch.uint8).sc
