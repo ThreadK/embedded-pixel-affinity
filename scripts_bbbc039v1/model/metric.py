@@ -37,4 +37,23 @@ class MeanIoU:
 
         per_batch_iou = []
         for _input, _target in zip(input, target):
-            binary_prediction = self._binarize_predictions(_input
+            binary_prediction = self._binarize_predictions(_input, n_classes)
+
+            if self.ignore_index is not None:
+                # zero out ignore_index
+                mask = _target == self.ignore_index
+                binary_prediction[mask] = 0
+                _target[mask] = 0
+
+            # convert to uint8 just in case
+            binary_prediction = binary_prediction.byte()
+            _target = _target.byte()
+
+            per_channel_iou = []
+            for c in range(n_classes):
+                if c in self.skip_channels:
+                    continue
+
+                per_channel_iou.append(self._jaccard_index(binary_prediction[c], _target[c]))
+
+            assert per_channel_iou, "All channels were ignored from the computat
