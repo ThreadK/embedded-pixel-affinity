@@ -73,4 +73,20 @@ class MeanIoU:
             return result.long()
 
         _, max_index = torch.max(input, dim=0, keepdim=True)
-        return torch.zeros_like(input, dtype=torch.uint8).sc
+        return torch.zeros_like(input, dtype=torch.uint8).scatter_(0, max_index, 1)
+
+    def _jaccard_index(self, prediction, target):
+        """
+        Computes IoU for a given target and prediction tensors
+        """
+        return torch.sum(prediction & target).float() / torch.clamp(torch.sum(prediction | target).float(), min=1e-8)
+
+def expand_as_one_hot(input, C, ignore_index=None):
+    """
+    Converts NxDxHxW label image to NxCxDxHxW, where each label gets converted to its corresponding one-hot vector
+    :param input: 4D input image (NxDxHxW)
+    :param C: number of channels/labels
+    :param ignore_index: ignore index to be kept during the expansion
+    :return: 5D output image (NxCxDxHxW)
+    """
+    assert input.dim()
