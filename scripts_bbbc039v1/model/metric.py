@@ -109,4 +109,6 @@ def expand_as_one_hot(input, C, ignore_index=None):
         result[mask] = ignore_index
         return result
     else:
-        #
+        # scatter to get the one-hot tensor
+        return torch.zeros(shape).to(input.device).scatter_(1, input, 1)
+
