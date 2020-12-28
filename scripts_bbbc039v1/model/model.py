@@ -39,4 +39,15 @@ class Modified3DUNet(nn.Module):
         self.inorm3d_c1 = nn.InstanceNorm3d(self.base_n_filter)
 
         # Level 2 context pathway
-        self.conv3d_c2 = nn.Conv3d(self.base_n_filter, self.base_n_filter * 2, kern
+        self.conv3d_c2 = nn.Conv3d(self.base_n_filter, self.base_n_filter * 2, kernel_size=3, stride=(1, 2, 2),
+                                   padding=(1, 1, 1), bias=False)
+        self.norm_lrelu_conv_c2 = self.norm_lrelu_conv(self.base_n_filter * 2, self.base_n_filter * 2)
+        self.inorm3d_c2 = nn.InstanceNorm3d(self.base_n_filter * 2)
+
+        # Level 3 context pathway
+        self.conv3d_c3 = nn.Conv3d(self.base_n_filter * 2, self.base_n_filter * 4, kernel_size=3, stride=(1, 2, 2),
+                                   padding=(1, 1, 1), bias=False)
+        self.norm_lrelu_conv_c3 = self.norm_lrelu_conv(self.base_n_filter * 4, self.base_n_filter * 4)
+        self.inorm3d_c3 = nn.InstanceNorm3d(self.base_n_filter * 4)
+
+        # Level 4 context pathway
