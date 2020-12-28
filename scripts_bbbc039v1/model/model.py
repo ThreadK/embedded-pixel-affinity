@@ -27,4 +27,16 @@ class Modified3DUNet(nn.Module):
         self.IN1 = nn.InstanceNorm3d(N )
         self.conv2 = nn.Conv3d(N, N, kernel_size=3, stride=(1, 2, 2), padding=1,
                                bias=False)
-        self.IN2 = n
+        self.IN2 = nn.InstanceNorm3d(N )
+        self.relu = nn.LeakyReLU(inplace=False)
+
+        # Level 1 context pathway
+        self.conv3d_c1_1 = nn.Conv3d(N, self.base_n_filter, kernel_size=3, stride=1, padding=1,
+                                     bias=False)
+        self.conv3d_c1_2 = nn.Conv3d(self.base_n_filter, self.base_n_filter, kernel_size=3, stride=1, padding=1,
+                                     bias=False)
+        self.lrelu_conv_c1 = self.lrelu_conv(self.base_n_filter, self.base_n_filter)
+        self.inorm3d_c1 = nn.InstanceNorm3d(self.base_n_filter)
+
+        # Level 2 context pathway
+        self.conv3d_c2 = nn.Conv3d(self.base_n_filter, self.base_n_filter * 2, kern
