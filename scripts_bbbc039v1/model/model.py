@@ -78,4 +78,13 @@ class Modified3DUNet(nn.Module):
 
         # Level 2 localization pathway
         self.conv_norm_lrelu_l2 = self.conv_norm_lrelu(self.base_n_filter * 8, self.base_n_filter * 8)
-        self.conv3d_l2 = nn.Conv3
+        self.conv3d_l2 = nn.Conv3d(self.base_n_filter * 8, self.base_n_filter * 4, kernel_size=1, stride=1, padding=0,
+                                   bias=False)
+        self.norm_lrelu_upscale_conv_norm_lrelu_l2 = self.norm_lrelu_upscale_conv_norm_lrelu(self.base_n_filter * 4,
+                                                                                             self.base_n_filter * 2)
+        self.upl2 = self.up(self.base_n_filter * 4, self.base_n_filter * 2)
+
+        # Level 3 localization pathway
+        self.conv_norm_lrelu_l3 = self.conv_norm_lrelu(self.base_n_filter * 4, self.base_n_filter * 4)
+        self.conv3d_l3 = nn.Conv3d(self.base_n_filter * 4, self.base_n_filter * 2, kernel_size=1, stride=1, padding=0,
+                      
