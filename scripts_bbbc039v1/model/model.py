@@ -69,4 +69,13 @@ class Modified3DUNet(nn.Module):
         self.inorm3d_l0 = nn.InstanceNorm3d(self.base_n_filter * 8)
 
         # Level 1 localization pathway
-        self.conv_norm_lrelu_l1 = self.conv_norm_lr
+        self.conv_norm_lrelu_l1 = self.conv_norm_lrelu(self.base_n_filter * 16, self.base_n_filter * 16)
+        self.conv3d_l1 = nn.Conv3d(self.base_n_filter * 16, self.base_n_filter * 8, kernel_size=1, stride=1, padding=0,
+                                   bias=False)
+        self.norm_lrelu_upscale_conv_norm_lrelu_l1 = self.norm_lrelu_upscale_conv_norm_lrelu(self.base_n_filter * 8,
+                                                                                             self.base_n_filter * 4)
+        self.upl1 = self.up(self.base_n_filter * 8, self.base_n_filter * 4)
+
+        # Level 2 localization pathway
+        self.conv_norm_lrelu_l2 = self.conv_norm_lrelu(self.base_n_filter * 8, self.base_n_filter * 8)
+        self.conv3d_l2 = nn.Conv3
