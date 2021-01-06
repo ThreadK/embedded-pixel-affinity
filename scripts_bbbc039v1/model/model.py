@@ -97,4 +97,19 @@ class Modified3DUNet(nn.Module):
         self.conv3d_l4 = nn.Conv3d(self.base_n_filter * 2, self.n_classes, kernel_size=1, stride=1, padding=0,
                                    bias=False)
 
-        self.ds2_1x1_conv3d = nn.Conv3d(self.base_n_filter * 8, self.n_clas
+        self.ds2_1x1_conv3d = nn.Conv3d(self.base_n_filter * 8, self.n_classes, kernel_size=1, stride=1, padding=0,
+                                        bias=False)
+        self.ds3_1x1_conv3d = nn.Conv3d(self.base_n_filter * 4, self.n_classes, kernel_size=1, stride=1, padding=0,
+                                        bias=False)
+
+    def conv_norm_lrelu(self, feat_in, feat_out):
+        return nn.Sequential(
+            nn.Conv3d(feat_in, feat_out, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.InstanceNorm3d(feat_out),
+            nn.LeakyReLU())
+
+    def norm_lrelu_conv(self, feat_in, feat_out):
+        return nn.Sequential(
+            nn.InstanceNorm3d(feat_in),
+            nn.LeakyReLU(),
+            nn.Conv3d(feat_in, feat_out, kernel_size=3, stride=1, padd
