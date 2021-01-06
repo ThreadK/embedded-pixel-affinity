@@ -112,4 +112,24 @@ class Modified3DUNet(nn.Module):
         return nn.Sequential(
             nn.InstanceNorm3d(feat_in),
             nn.LeakyReLU(),
-            nn.Conv3d(feat_in, feat_out, kernel_size=3, stride=1, padd
+            nn.Conv3d(feat_in, feat_out, kernel_size=3, stride=1, padding=1, bias=False))
+
+    def lrelu_conv(self, feat_in, feat_out):
+        return nn.Sequential(
+            nn.LeakyReLU(),
+            nn.Conv3d(feat_in, feat_out, kernel_size=3, stride=1, padding=1, bias=False))
+
+    def norm_lrelu_upscale_conv_norm_lrelu(self, feat_in, feat_out):
+        return nn.Sequential(
+            nn.InstanceNorm3d(feat_in),
+            nn.LeakyReLU())
+
+    def up(self, feat_in, feat_out):
+        return nn.Sequential(
+            # should be feat_in*2 or feat_in
+            nn.Conv3d(feat_in, feat_out, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.InstanceNorm3d(feat_out),
+            nn.LeakyReLU())
+
+    def forward(self, x):
+        # mult-leve
