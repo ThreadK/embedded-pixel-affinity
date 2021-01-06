@@ -132,4 +132,28 @@ class Modified3DUNet(nn.Module):
             nn.LeakyReLU())
 
     def forward(self, x):
-        # mult-leve
+        # mult-level inputs
+        # x2 = self.pooling1(x)
+        # x3 = self.pooling1(x2)
+        # x4 = self.pooling1(x3)
+        # x5 = self.pooling1(x4)
+        # x2 = self.full2(x2)
+        # x3 = self.full3(x3)
+        # x4 = self.full4(x4)
+        # x5 = self.full5(x5)
+        # stem layer
+        x = self.conv1(x)
+        x = self.IN1(x)
+        x = self.conv2(x)
+        x = self.IN2(x)
+        x = self.relu(x)
+
+        #  Level 1 context pathway
+        out = self.conv3d_c1_1(x)
+        residual_1 = out
+        out = self.lrelu(out)
+        out = self.conv3d_c1_2(out)
+        out = self.dropout3d(out)
+        out = self.lrelu_conv_c1(out)
+        # Element Wise Summation
+    
