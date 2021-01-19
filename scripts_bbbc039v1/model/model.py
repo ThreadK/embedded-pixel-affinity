@@ -206,4 +206,21 @@ class Modified3DUNet(nn.Module):
         # out = out + x5
         residual_5 = out
         out = self.norm_lrelu_conv_c5(out)
-        out = s
+        out = self.dropout3d(out)
+        out = self.norm_lrelu_conv_c5(out)
+        out += residual_5
+        out = self.norm_lrelu_upscale_conv_norm_lrelu_l0(out)
+        up_binear0 = nn.Upsample(size=(out.size(2), 2 * out.size(3), 2 * out.size(4)), mode='trilinear', align_corners=False)
+        out = up_binear0(out)
+        out = self.upl0(out)
+
+        out = self.conv3d_l0(out)
+        out = self.inorm3d_l0(out)
+        out = self.lrelu(out)
+
+        # Level 1 localization pathway
+        out = torch.cat([out, context_4], dim=1)
+        out = self.conv_norm_lrelu_l1(out)
+        out = self.conv3d_l1(out)
+        out = self.norm_lrelu_upscale_conv_norm_lrelu_l1(out)
+        up_binear1 = nn.Upsample(size=(out.siz
