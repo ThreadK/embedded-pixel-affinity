@@ -180,4 +180,30 @@ class Modified3DUNet(nn.Module):
         # out = x3 + out
         residual_3 = out
         out = self.norm_lrelu_conv_c3(out)
-        out = 
+        out = self.dropout3d(out)
+        out = self.norm_lrelu_conv_c3(out)
+        out += residual_3
+        out = self.inorm3d_c3(out)
+        out = self.lrelu(out)
+        context_3 = out
+
+        # Level 4 context pathway
+
+        out = self.conv3d_c4(out)
+        # out = out + x4
+        residual_4 = out
+        out = self.norm_lrelu_conv_c4(out)
+        out = self.dropout3d(out)
+        out = self.norm_lrelu_conv_c4(out)
+        out += residual_4
+        out = self.inorm3d_c4(out)
+        out = self.lrelu(out)
+        context_4 = out
+
+        # Level 5
+
+        out = self.conv3d_c5(out)
+        # out = out + x5
+        residual_5 = out
+        out = self.norm_lrelu_conv_c5(out)
+        out = s
