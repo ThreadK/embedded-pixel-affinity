@@ -156,4 +156,28 @@ class Modified3DUNet(nn.Module):
         out = self.dropout3d(out)
         out = self.lrelu_conv_c1(out)
         # Element Wise Summation
-    
+        out += residual_1
+        context_1 = self.lrelu(out)
+        out = self.inorm3d_c1(out)
+        out = self.lrelu(out)
+
+        # Level 2 context pathway
+
+        out = self.conv3d_c2(out)
+        # out = x2 + out
+        residual_2 = out
+        out = self.norm_lrelu_conv_c2(out)
+        out = self.dropout3d(out)
+        out = self.norm_lrelu_conv_c2(out)
+        out += residual_2
+        out = self.inorm3d_c2(out)
+        out = self.lrelu(out)
+        context_2 = out
+
+        # Level 3 context pathway
+
+        out = self.conv3d_c3(out)
+        # out = x3 + out
+        residual_3 = out
+        out = self.norm_lrelu_conv_c3(out)
+        out = 
