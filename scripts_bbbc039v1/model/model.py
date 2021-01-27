@@ -255,3 +255,12 @@ class Modified3DUNet(nn.Module):
         ds2_1x1_conv = self.ds2_1x1_conv3d(ds2)
         up_binear4 = nn.Upsample(size=(ds2_1x1_conv.size(2), 2 * ds2_1x1_conv.size(3), 2 * ds2_1x1_conv.size(4)),
                                  mode='trilinear',align_corners=False)
+        ds1_ds2_sum_upscale = up_binear4(ds2_1x1_conv)
+        ds3_1x1_conv = self.ds3_1x1_conv3d(ds3)
+        ds1_ds2_sum_upscale_ds3_sum = ds1_ds2_sum_upscale + ds3_1x1_conv
+        ds1_ds2_sum_upscale_ds3_sum_upscale = F.interpolate(ds1_ds2_sum_upscale_ds3_sum,
+                                                         size=(ds1_ds2_sum_upscale_ds3_sum.size(2),
+                                                               2 * ds1_ds2_sum_upscale_ds3_sum.size(3),
+                                                               2 * ds1_ds2_sum_upscale_ds3_sum.size(4)),
+                                                         mode='trilinear',align_corners=False)
+     
