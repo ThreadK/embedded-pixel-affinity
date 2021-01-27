@@ -240,4 +240,18 @@ class Modified3DUNet(nn.Module):
         # Level 3 localization pathway
         out = torch.cat([out, context_2], dim=1)
         out = self.conv_norm_lrelu_l3(out)
-    
+        ds3 = out
+        out = self.conv3d_l3(out)
+        out = self.norm_lrelu_upscale_conv_norm_lrelu_l3(out)
+        up_binear3 = nn.Upsample(size=(out.size(2), 2 * out.size(3), 2 * out.size(4)), mode='trilinear',align_corners=False)
+        out = up_binear3(out)
+        out = self.upl3(out)
+
+        # Level 4 localization pathway
+        out = torch.cat([out, context_1], dim=1)
+        out = self.conv_norm_lrelu_l4(out)
+        out_pred = self.conv3d_l4(out)
+
+        ds2_1x1_conv = self.ds2_1x1_conv3d(ds2)
+        up_binear4 = nn.Upsample(size=(ds2_1x1_conv.size(2), 2 * ds2_1x1_conv.size(3), 2 * ds2_1x1_conv.size(4)),
+                                 mode='trilinear',align_corners=False)
