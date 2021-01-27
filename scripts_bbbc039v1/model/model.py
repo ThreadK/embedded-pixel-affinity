@@ -223,4 +223,21 @@ class Modified3DUNet(nn.Module):
         out = self.conv_norm_lrelu_l1(out)
         out = self.conv3d_l1(out)
         out = self.norm_lrelu_upscale_conv_norm_lrelu_l1(out)
-        up_binear1 = nn.Upsample(size=(out.siz
+        up_binear1 = nn.Upsample(size=(out.size(2), 2 * out.size(3), 2 * out.size(4)), mode='trilinear',align_corners=False)
+        out = up_binear1(out)
+        out = self.upl1(out)
+
+        # Level 2 localization pathway
+        out = torch.cat([out, context_3], dim=1)
+        out = self.conv_norm_lrelu_l2(out)
+        ds2 = out
+        out = self.conv3d_l2(out)
+        out = self.norm_lrelu_upscale_conv_norm_lrelu_l2(out)
+        up_binear2 = nn.Upsample(size=(out.size(2), 2 * out.size(3), 2 * out.size(4)), mode='trilinear',align_corners=False)
+        out = up_binear2(out)
+        out = self.upl2(out)
+
+        # Level 3 localization pathway
+        out = torch.cat([out, context_2], dim=1)
+        out = self.conv_norm_lrelu_l3(out)
+    
