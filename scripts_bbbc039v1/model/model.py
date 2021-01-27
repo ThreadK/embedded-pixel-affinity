@@ -263,4 +263,17 @@ class Modified3DUNet(nn.Module):
                                                                2 * ds1_ds2_sum_upscale_ds3_sum.size(3),
                                                                2 * ds1_ds2_sum_upscale_ds3_sum.size(4)),
                                                          mode='trilinear',align_corners=False)
-     
+        out = out_pred + ds1_ds2_sum_upscale_ds3_sum_upscale
+        out = F.interpolate(out, size=(out.size(2), 2*out.size(3), 2*out.size(4)), mode='trilinear',align_corners=False)
+        return out
+
+class UNet3D(nn.Module):
+    def __init__(self, in_channel=1, n_classes=2, bn=False):
+        self.in_channel = in_channel
+        self.n_classes = n_classes
+        super(UNet3D, self).__init__()
+        self.ec0 = self.encoder(self.in_channel, 8, bias=False, batchnorm=bn)
+        self.ec1 = self.encoder(8, 16, bias=False, batchnorm=bn)
+        self.ec2 = self.encoder(16, 16, bias=False, batchnorm=bn)
+        self.ec3 = self.encoder(16, 32, bias=False, batchnorm=bn)
+        self.ec4 = self.encoder(32, 32, bias=False,
