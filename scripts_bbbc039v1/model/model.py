@@ -289,4 +289,12 @@ class UNet3D(nn.Module):
         self.dc8 = self.decoder(64 + 128, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.dc7 = self.decoder(64, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.dc6 = self.decoder(64, 64, kernel_size=2, stride=2, bias=False)
-        self.dc5 = self.decoder(32 + 64, 32, ke
+        self.dc5 = self.decoder(32 + 64, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        self.dc4 = self.decoder(32, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        self.dc3 = self.decoder(32, 32, kernel_size=2, stride=2, bias=False)
+        self.dc2 = self.decoder(16 + 32, 16, kernel_size=3, stride=1, padding=1, bias=False)
+        self.dc1 = self.decoder(16, 16, kernel_size=3, stride=1, padding=1, bias=False)
+        self.dc0 = self.decoder(16, n_classes, kernel_size=1, stride=1, bias=False)
+        # self.dc9 = self.decoder(128, 128, kernel_size=3, stride=1, bias=False, padding=1)  # kernel_size=2, stride=2
+        # self.dc8 = self.decoder(64 + 128, 64, kernel_size=3, stride=1, padding=1, bias=False)
+    
