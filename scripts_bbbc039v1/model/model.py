@@ -276,4 +276,17 @@ class UNet3D(nn.Module):
         self.ec1 = self.encoder(8, 16, bias=False, batchnorm=bn)
         self.ec2 = self.encoder(16, 16, bias=False, batchnorm=bn)
         self.ec3 = self.encoder(16, 32, bias=False, batchnorm=bn)
-        self.ec4 = self.encoder(32, 32, bias=False,
+        self.ec4 = self.encoder(32, 32, bias=False, batchnorm=bn)
+        self.ec5 = self.encoder(32, 64, bias=False, batchnorm=bn)
+        self.ec6 = self.encoder(64, 64, bias=False, batchnorm=bn)
+        self.ec7 = self.encoder(64, 128, bias=False, batchnorm=bn)
+
+        self.pool0 = nn.MaxPool3d(2)
+        self.pool1 = nn.MaxPool3d(2)
+        self.pool2 = nn.MaxPool3d(2)
+
+        self.dc9 = self.decoder(128, 128, kernel_size=2, stride=2, bias=False)
+        self.dc8 = self.decoder(64 + 128, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.dc7 = self.decoder(64, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.dc6 = self.decoder(64, 64, kernel_size=2, stride=2, bias=False)
+        self.dc5 = self.decoder(32 + 64, 32, ke
