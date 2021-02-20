@@ -304,4 +304,20 @@ class UNet3D(nn.Module):
         # self.dc3 = self.decoder(32, 32, kernel_size=3, stride=1, bias=False, padding=1)  # kernel_size=2, stride=2
         # self.dc2 = self.decoder(16 + 32, 16, kernel_size=3, stride=1, padding=1, bias=False)
         # self.dc1 = self.decoder(16, 16, kernel_size=3, stride=1, padding=1, bias=False)
-        # self.dc
+        # self.dc0 = self.decoder(16, n_classes, kernel_size=1, stride=1, bias=False)
+
+    def encoder(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1,
+                bias=True, batchnorm=False):
+        if batchnorm:
+            layer = nn.Sequential(
+                nn.Conv3d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias),
+                nn.BatchNorm3d(out_channels),
+                nn.ReLU())
+        else:
+            layer = nn.Sequential(
+                nn.Conv3d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias),
+                nn.ReLU())
+        return layer
+
+
+    def decoder(self, in_channels, out_channels, kernel_size, s
