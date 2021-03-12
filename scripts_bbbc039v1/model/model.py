@@ -320,4 +320,23 @@ class UNet3D(nn.Module):
         return layer
 
 
-    def decoder(self, in_channels, out_channels, kernel_size, s
+    def decoder(self, in_channels, out_channels, kernel_size, stride=1, padding=0,
+                output_padding=0, bias=True):
+        layer = nn.Sequential(
+            nn.ConvTranspose3d(in_channels, out_channels, kernel_size, stride=stride,
+                               padding=padding, output_padding=output_padding, bias=bias),
+            # nn.Conv3d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias),
+            nn.ReLU())
+        return layer
+
+    def forward(self, x):
+        e0 = self.ec0(x)
+        syn0 = self.ec1(e0)
+        e1 = self.pool0(syn0)
+        e2 = self.ec2(e1)
+        syn1 = self.ec3(e2)
+        del e0, e1, e2
+
+        e3 = self.pool1(syn1)
+        e4 = self.ec4(e3)
+        syn2 = self.ec5(e4
