@@ -339,4 +339,29 @@ class UNet3D(nn.Module):
 
         e3 = self.pool1(syn1)
         e4 = self.ec4(e3)
-        syn2 = self.ec5(e4
+        syn2 = self.ec5(e4)
+        del e3, e4
+
+        e5 = self.pool2(syn2)
+        e6 = self.ec6(e5)
+        e7 = self.ec7(e6)     
+        del e5, e6
+
+        d9 = torch.cat((self.dc9(e7), syn2),dim=1)
+        #d9 = torch.cat((self.dc9(F.interpolate(e7, scale_factor=2, mode="trilinear")), syn2), dim=1)
+        del e7, syn2
+
+        d8 = self.dc8(d9)
+        d7 = self.dc7(d8)
+        del d9, d8
+
+        d6 = torch.cat((self.dc6(d7), syn1),dim=1)
+        #d6 = torch.cat((self.dc6(F.interpolate(d7, scale_factor=2, mode="trilinear")), syn1), dim=1)
+        del d7, syn1
+
+        d5 = self.dc5(d6)
+        d4 = self.dc4(d5)
+        del d6, d5
+
+        d3 = torch.cat((self.dc3(d4), syn0),dim=1)
+        #d3 = torch.ca
