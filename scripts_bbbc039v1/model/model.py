@@ -364,4 +364,14 @@ class UNet3D(nn.Module):
         del d6, d5
 
         d3 = torch.cat((self.dc3(d4), syn0),dim=1)
-        #d3 = torch.ca
+        #d3 = torch.cat((self.dc3(F.interpolate(d4, scale_factor=2, mode="trilinear")), syn0), dim=1)
+        del d4, syn0
+
+        d2 = self.dc2(d3)
+        d1 = self.dc1(d2)
+        del d3, d2
+
+        d0 = self.dc0(d1)
+        return d0
+
+
