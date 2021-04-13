@@ -56,4 +56,22 @@ def cluster(emb, clustering_alg, semantic_mask=None):
     # always increase the labels by 1 cause clustering results start from 0 and we may loose one object
     result[flattened_mask == 1] = clusters + 1
 
-    return result
+    return result.reshape(output_shape)
+
+
+def cluster_hdbscan(emb, min_size, eps, min_samples=None, semantic_mask=None):
+    clustering = hdbscan.HDBSCAN(min_cluster_size=min_size, cluster_selection_epsilon=eps, min_samples=min_samples)
+    return cluster(emb, clustering, semantic_mask)
+
+
+def cluster_dbscan(emb, eps, min_samples, semantic_mask=None):
+    clustering = DBSCAN(eps=eps, min_samples=min_samples)
+    return cluster(emb, clustering, semantic_mask)
+
+
+def cluster_ms(emb, bandwidth, semantic_mask=None):
+    clustering = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+    return cluster(emb, clustering, semantic_mask)
+
+
+def
