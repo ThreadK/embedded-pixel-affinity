@@ -74,4 +74,25 @@ def cluster_ms(emb, bandwidth, semantic_mask=None):
     return cluster(emb, clustering, semantic_mask)
 
 
-def
+def cluster_consistency(emb1, emb2, eps, iou_threshold, num_anchors=100):
+    """
+    Consistency clustering as described in https://arxiv.org/abs/2103.14572
+    """
+    clustering = MeanShift(bandwidth=eps, bin_seeding=True)
+    clusters = cluster(emb1, clustering)
+
+    for l in np.unique(clusters):
+        if l == 0:
+            continue
+
+        mask = clusters == l
+
+        iou_table = []
+        y, x = np.nonzero(mask)
+        for _ in range(num_anchors):
+            ind = np.random.randint(len(y))
+            anchor_emb = emb2[:, y[ind], x[ind]]
+            anchor_emb = anchor_emb[:, None, None]
+            # compute the instance mask from emb2
+            inst_mask = LA.norm(emb2 - anchor_emb, axis=0) < eps
+          
