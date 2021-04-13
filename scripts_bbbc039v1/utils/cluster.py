@@ -37,4 +37,23 @@ def expand_labels_watershed(seg, raw, erosion_iters=4):
 def cluster(emb, clustering_alg, semantic_mask=None):
     output_shape = emb.shape[1:]
     # reshape (E, D, H, W) -> (E, D * H * W) and transpose -> (D * H * W, E)
-    flattened_embeddings = emb.reshape(emb.sha
+    flattened_embeddings = emb.reshape(emb.shape[0], -1).transpose()
+
+    result = np.zeros(flattened_embeddings.shape[0])
+
+    if semantic_mask is not None:
+        flattened_mask = semantic_mask.reshape(-1)
+        assert flattened_mask.shape[0] == flattened_embeddings.shape[0]
+    else:
+        flattened_mask = np.ones(flattened_embeddings.shape[0])
+
+    if flattened_mask.sum() == 0:
+        # return zeros for empty masks
+        return result.reshape(output_shape)
+
+    # cluster only within the foreground mask
+    clusters = clustering_alg.fit_predict(flattened_embeddings[flattened_mask == 1])
+    # always increase the labels by 1 cause clustering results start from 0 and we may loose one object
+    result[flattened_mask == 1] = clusters + 1
+
+    return result
