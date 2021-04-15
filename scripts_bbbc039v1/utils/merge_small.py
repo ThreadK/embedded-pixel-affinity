@@ -17,4 +17,26 @@ class UnionFind(object):
         self.nodes = [Node(n) for n in range(n_labels)]
 
 
-    # find the root of u and com
+    # find the root of u and compress the path on the way
+    def find(self, u_id):
+        #assert u_id < self.n_labels
+        u = self.nodes[ u_id ]
+        return self.findNode(u)
+
+    # find the root of u and compress the path on the way
+    def findNode(self, u):
+        if u.parent == u:
+            return u
+        else:
+            u.parent = self.findNode(u.parent)
+            return u.parent
+
+    def merge(self, u_id, v_id):
+        #assert u_id < self.n_labels
+        #assert v_id < self.n_labels
+        u = self.nodes[ u_id ]
+        v = self.nodes[ v_id ]
+        self.mergeNode(u, v)
+
+    # merge u and v trees in a union by rank manner
+    def mergeNode(self, u, 
