@@ -95,4 +95,11 @@ def cluster_consistency(emb1, emb2, eps, iou_threshold, num_anchors=100):
             anchor_emb = anchor_emb[:, None, None]
             # compute the instance mask from emb2
             inst_mask = LA.norm(emb2 - anchor_emb, axis=0) < eps
-          
+            iou_table.append(iou(mask, inst_mask))
+
+        median_iou = np.median(iou_table)
+
+        if median_iou < iou_threshold:
+            clusters[mask] = 0
+
+    return clusters
