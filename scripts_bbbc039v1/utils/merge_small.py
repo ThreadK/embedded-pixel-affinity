@@ -39,4 +39,30 @@ class UnionFind(object):
         self.mergeNode(u, v)
 
     # merge u and v trees in a union by rank manner
-    def mergeNode(self, u, 
+    def mergeNode(self, u, v):
+        u_root = self.findNode(u)
+        v_root = self.findNode(v)
+        if u_root.rank > v_root.rank:
+            v_root.parent = u_root
+        elif u_root.rank < v_root.rank:
+            u_root.parent = v_root
+        elif u_root != v_root:
+            v_root.parent = u_root
+            u_root.rank += 1
+
+    # get the new sets after merging
+    def get_merge_result(self):
+
+        merge_result = []
+
+        # find all the unique roots
+        roots = []
+        for u in self.nodes:
+            root = self.findNode(u)
+            if not root in roots:
+                roots.append(root)
+
+        # find ordering of roots (from 1 to n_roots)
+        roots_ordered = {}
+        root_id = 0
+        for root in roots:
