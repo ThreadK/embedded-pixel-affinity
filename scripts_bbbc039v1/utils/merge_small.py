@@ -84,4 +84,18 @@ class UnionFind(object):
 
 # numpy.replace: replcaces the values in array according to dict
 # cf. SO: http://stackoverflow.com/questions/3403973/fast-replacement-of-values-in-a-numpy-array
-def replace_from_dict(array, di
+def replace_from_dict(array, dict_like):
+    replace_keys, replace_vals = np.array(list(zip( *sorted(dict_like.items() ))))
+    # FIXME This is just some dirty hack because I can't get np version 1.10 to run
+    if np.__version__ == '1.9.3':
+        indices = np.digitize(array.flatten(), replace_keys, right=True)
+        return replace_vals[indices].astype(array.dtype).reshape(array.shape)
+    else:
+        indices = np.digitize(array, replace_keys, right = True)
+        return replace_vals[indices].astype(array.dtype)
+
+# TODO 10,000 seems to be a pretty large default value !
+# TODO FIXME rethink the relabeling here, in which cases do we want it, can it hurt?
+def remove_small_segments(segmentation,
+        size_thresh = 10000,
+        relabel =
