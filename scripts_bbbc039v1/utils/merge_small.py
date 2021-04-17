@@ -66,3 +66,22 @@ class UnionFind(object):
         roots_ordered = {}
         root_id = 0
         for root in roots:
+            merge_result.append( [] )
+            roots_ordered[root] = root_id
+            root_id += 1
+        for u in self.nodes:
+            u_label = u.label
+            root = self.findNode(u)
+            merge_result[ roots_ordered[root] ].append(u_label)
+
+        # sort the nodes in the result
+        #(this might result in problems if label_type cannot be sorted)
+        for res in merge_result:
+            res.sort()
+
+        return merge_result
+
+
+# numpy.replace: replcaces the values in array according to dict
+# cf. SO: http://stackoverflow.com/questions/3403973/fast-replacement-of-values-in-a-numpy-array
+def replace_from_dict(array, di
