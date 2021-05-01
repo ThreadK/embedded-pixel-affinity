@@ -98,4 +98,19 @@ def replace_from_dict(array, dict_like):
 # TODO FIXME rethink the relabeling here, in which cases do we want it, can it hurt?
 def remove_small_segments(segmentation,
         size_thresh = 10000,
-        relabel =
+        relabel = True):
+
+    # Make sure all objects have their individual label
+    # TODO FIXME this is very dangerous for sample C (black slices !)!
+    if relabel:
+        segmentation = vigra.analysis.labelVolumeWithBackground(
+            segmentation.astype('uint32'), neighborhood=6, background_value=0)
+
+    # Get the unique values of the segmentation including counts
+    uniq, counts = np.unique(segmentation, return_counts=True)
+
+    # Keep all uniques that have a count smaller than size_thresh
+    small_objs = uniq[counts < size_thresh]
+    large_objs = uniq[counts >= size_thresh]
+    print('len(large_objs) == {}'.format(len(large_objs)))
+    print('len(small_objs)
