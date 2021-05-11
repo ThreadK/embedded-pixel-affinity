@@ -146,4 +146,22 @@ def merge_small_segments(mc_seg, min_seg_size):
 
     print("Merging segments in mc-result with size smaller than", min_seg_size)
 
-    seg_sizes = np.bincount(mc_
+    seg_sizes = np.bincount(mc_seg.ravel())
+
+    segs_merge = np.zeros(n_nodes+1, dtype = bool)
+    segs_merge[seg_sizes <= min_seg_size] = True
+    print("Merging", np.sum(segs_merge), "segments")
+
+    merge_nodes = []
+    for node in seg_rag.nodeIter():
+        n_id = node.id
+        # if the node id is not zero and it is marked in segs_merge, we merge it
+        if n_id != 0 and segs_merge[n_id]:
+            # need to find the adjacent node with largest edge
+            max_edge_size = 0
+            merge_node_id = -1
+            for adj_node in seg_rag.neighbourNodeIter(node):
+                edge = seg_rag.findEdge(node,adj_node)
+                edge_size = len( seg_rag.edgeCoordinates(edge) )
+                if edge_size > max_edge_size:
+                    max_e
