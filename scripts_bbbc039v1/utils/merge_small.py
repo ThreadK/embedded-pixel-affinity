@@ -127,4 +127,23 @@ def remove_small_segments(segmentation,
 
 
 # merge segments that are smaller than min_seg_size
-# TODO more efficientl
+# TODO more efficiently ?!
+# TODO test this properly!
+def merge_small_segments(mc_seg, min_seg_size):
+    seg_rag = vigra.graphs.regionAdjacencyGraph(
+            vigra.graphs.gridGraph(mc_seg.shape),
+            mc_seg.astype(np.uint32))
+
+    # zero should be reserved for the ignore label!
+    assert 0 not in mc_seg
+
+    n_nodes = seg_rag.nodeNum
+
+    # FIXME This caused a yet not investigated error
+    # assert n_nodes == mc_seg.max(), str(n_nodes) + " , " + str(mc_seg.max())
+    if not n_nodes == mc_seg.max():
+        print("Warning: (n_nodes = {}) != (mc_seg.max() = {})".format(n_nodes, mc_seg.max()))
+
+    print("Merging segments in mc-result with size smaller than", min_seg_size)
+
+    seg_sizes = np.bincount(mc_
