@@ -185,4 +185,8 @@ def merge_small_segments(mc_seg, min_seg_size):
             old_to_new[n_id] = set_id
 
     # merge the new nodes
-    merged_seg = seg_rag.projectLabelsToBaseGraph(old_to_ne
+    merged_seg = seg_rag.projectLabelsToBaseGraph(old_to_new)
+    # print(merged_seg.shape)
+    # print(merged_seg.dtype)
+    # merged_seg = vigra.analysis.labelVolume(merged_seg)
+    return merged_seg
