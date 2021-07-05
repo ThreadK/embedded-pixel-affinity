@@ -77,4 +77,21 @@ class Grayscale(DataAugment):
 
     def _invert(self, data, random_state=np.random):
         """
-        Invert in
+        Invert input images
+        """
+        imgs = data['image']
+        transformedimgs = np.copy(imgs)
+        transformedimgs = 1.0-transformedimgs
+        transformedimgs = np.clip(transformedimgs, 0, 1)
+
+        data['image'] = transformedimgs
+        return data
+
+    ####################################################################
+    ## Setters.
+    ####################################################################
+
+    def _set_mode(self, mode):
+        """Set 2D/3D/mix greyscale value augmentation mode."""
+        assert mode=='2D' or mode=='3D' or mode=='mix'
+        self.mode = mode
