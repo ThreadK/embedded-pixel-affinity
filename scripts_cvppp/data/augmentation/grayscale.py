@@ -16,4 +16,25 @@ class Grayscale(DataAugment):
 
     def __init__(self, contrast_factor=0.3, brightness_factor=0.3, mode='mix', p=0.5):
         """Initialize parameters.
-        "
+        """
+        super(Grayscale, self).__init__(p=p)
+        self._set_mode(mode)
+        self.CONTRAST_FACTOR   = contrast_factor
+        self.BRIGHTNESS_FACTOR = brightness_factor
+
+    def set_params(self):
+        # No change in sample size
+        pass
+
+    def __call__(self, data, random_state=np.random):
+
+        if self.mode == 'mix':
+            mode = '3D' if random_state.rand() > 0.5 else '2D'
+        else:
+            mode = self.mode
+
+        # apply augmentations  
+        if mode == '2D': 
+            data = self._augment2D(data, random_state)
+        if mode == '3D': 
+            data = self._augment
