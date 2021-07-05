@@ -56,4 +56,25 @@ class Grayscale(DataAugment):
             img **= 2.0**(ran[z*3+2]*2 - 1)
             transformedimgs[z, :, :] = img
 
-        data[
+        data['image'] = transformedimgs
+        return data    
+
+    def _augment3D(self, data, random_state=np.random):
+        """
+        Adapted from ELEKTRONN (http://elektronn.org/).
+        """
+        ran = random_state.rand(3)
+
+        imgs = data['image']
+        transformedimgs = np.copy(imgs)
+        transformedimgs *= 1 + (ran[0] - 0.5)*self.CONTRAST_FACTOR
+        transformedimgs += (ran[1] - 0.5)*self.BRIGHTNESS_FACTOR
+        transformedimgs = np.clip(transformedimgs, 0, 1)
+        transformedimgs **= 2.0**(ran[2]*2 - 1)
+        
+        data['image'] = transformedimgs
+        return data
+
+    def _invert(self, data, random_state=np.random):
+        """
+        Invert in
