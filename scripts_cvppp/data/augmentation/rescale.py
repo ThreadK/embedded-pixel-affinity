@@ -40,4 +40,17 @@ class Rescale(DataAugment):
         transformed_label = label.copy()
 
         y_length = int(sf_y * image.shape[1])
-        if y_length <= image.shape[1
+        if y_length <= image.shape[1]:
+            y0 = random_state.randint(low=0, high=image.shape[1]-y_length+1)
+            y1 = y0 + y_length
+            transformed_image = transformed_image[:, y0:y1, :]
+            transformed_label = transformed_label[:, y0:y1, :]
+        else:
+            y0 = int(np.floor((y_length - image.shape[1]) / 2))
+            y1 = int(np.ceil((y_length - image.shape[1]) / 2))
+            transformed_image = np.pad(transformed_image, ((0, 0),(y0, y1),(0, 0)), mode='constant')
+            transformed_label = np.pad(transformed_label, ((0, 0),(y0, y1),(0, 0)), mode='constant')
+
+        x_length = int(sf_x * image.shape[2])
+        if x_length <= image.shape[2]:
+            x0 = random_state.randin
