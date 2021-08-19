@@ -53,4 +53,15 @@ class Rescale(DataAugment):
 
         x_length = int(sf_x * image.shape[2])
         if x_length <= image.shape[2]:
-            x0 = random_state.randin
+            x0 = random_state.randint(low=0, high=image.shape[2]-x_length+1)
+            x1 = x0 + x_length
+            transformed_image = transformed_image[:, :, x0:x1]
+            transformed_label = transformed_label[:, :, x0:x1]
+        else:
+            x0 = int(np.floor((x_length - image.shape[2]) / 2))
+            x1 = int(np.ceil((x_length - image.shape[2]) / 2))
+            transformed_image = np.pad(transformed_image, ((0, 0),(0, 0),(x0, x1)), mode='constant')
+            transformed_label = np.pad(transformed_label, ((0, 0),(0, 0),(x0, x1)), mode='constant')
+
+        output_image = resize(transformed_image, image.shape, order=self.image_interpolation, mode='constant', cval=0, 
+                              clip=True, preserve_range
