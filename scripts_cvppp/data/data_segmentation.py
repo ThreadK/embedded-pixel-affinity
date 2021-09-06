@@ -155,3 +155,129 @@ def seg_to_weight(target, wopts, mask=None):
         out[wid] = foo
         if wopt == '1': # 1: by gt-target ratio 
             out[wid] = weight_binary_ratio(target, mask)
+        elif wopt == '2': # 2: unet weight
+            out[wid] = weight_unet3d(target)
+    return out
+
+def seg_to_targets(label, topts):
+    # input: (D, H, W)
+    # output: (C, D, H, W)
+    out = [None]*len(topts)
+    for tid, topt in enumerate(topts):
+        if topt[0] == '9': # generic segmantic segmentation
+            out[tid] = label.astype(np.int64)
+        elif topt == '0': # binary
+            out[tid] = (label>0)[None,:].astype(np.float32)
+        elif topt[0] == '1': # synaptic polarity:
+            tmp = [None]*3 
+            tmp[0] = np.logical_and((label % 2) == 1, label > 0)
+            tmp[1] = np.logical_and((label % 2) == 0, label > 0)
+            tmp[2] = (label > 0)
+            out[tid] = np.stack(tmp, 0).astype(np.float32)
+        elif topt[0] == '2': # affinity
+            if label.ndim == 3: # 3d aff 
+                out[tid] = seg_to_aff(label)
+            elif label.ndim == 2: # 2d aff 
+                out[tid] = seg_to_aff(label, nhood=mknhood2d(1))
+            else:
+                raise ValueError('Undefined affinity computation for ndim = ' + str(label.ndim))
+        elif topt[0] == '3': # small object mask
+            # size_thres: 2d threshold for small size
+            # zratio: resolution ration between z and x/y
+            # mask_dsize: mask dilation size
+            _, size_thres, zratio, _ = [int(x) for x in topt.split('-')]
+            out[tid] = (seg_to_small_seg(label, size_thres, zratio)>0)[None,:].astype(np.float32)
+        elif topt[0] == '4': # instance boundary mask
+            _, bd_sz,do_bg = [int(x) for x in topt.split('-')]
+            if label.ndim == 2:
+                out[tid] = seg_to_instance_bd(label[None,:], bd_sz, do_bg).astype(np.float32)
+            else:
+                out[tid] = seg_to_instance_bd(label, bd_sz, do_bg)[None,:].astype(np.float32)
+        elif topt[0] == '5': # distance transform
+            if len(topt) == 1: 
+                topt = topt + '-2d'
+            mode = topt.split('-')
+            out[tid] = distance_transform_vol(label.copy(), mode=mode)
+        else:
+            raise NameError("Target option %s is not valid!" % topt[0])
+
+    return out
+
+def weight_binary_ratio(label, mask=None, alpha=1.0):
+    """Binary-class rebalancing."""
+    # input: numpy tensor
+    # weight for smaller class is 1, the bigger one is at most 20*alpha
+    if label.max() == label.min(): # uniform weights for single-label volume
+        weight_factor = 1.0
+        weight = np.ones_like(label, np.float32)
+    else:
+        label = (label!=0).astype(int)
+        if mask is None:
+            weight_factor = float(label.sum()) / np.prod(label.shape)
+        else:
+            weight_factor = float((label*mask).sum()) / mask.sum()
+        weight_factor = np.clip(weight_factor, a_min=5e-2, a_max=0.99)
+
+        if weight_factor > 0.5:
+            weight = label + alpha*weight_factor/(1-weight_factor)*(1-label)
+        else:
+            weight = alpha*(1-weight_factor)/weight_factor*label + (1-label)
+
+        if mask is not None:
+            weight = weight*mask
+
+    return weight.astype(np.float32)
+
+def weight_unet3d(seg, w0=10, sigma=5):
+    out = np.zeros_like(seg)
+    zid = np.where((seg>0).max(axis=1).max(axis=1)>0)[0]
+    for z in zid:
+        out[z] = weight_unet2d(seg[z], w0, sigma)
+    return out
+
+def weight_unet2d(seg, w0=10, sigma=5):
+    """
+    Generate the weight maps as specified in the UNet paper
+    for a multi-instance seg map.
+    
+    Parameters
+    ----------
+    seg: array-like
+        A 2D array of shape (image_height, image_width)
+
+    Returns
+    -------
+    array-like
+        A 2D array of shape (image_height, image_width)
+    
+    """    
+    seg_ids = np.unique(seg)
+    seg_ids = seg_ids[seg_ids>0]
+    nrows, ncols = seg.shape    
+    distMap = np.ones((nrows * ncols, 2))*(nrows+ncols)
+    X1, Y1 = np.meshgrid(range(ncols), range(nrows))
+    X1, Y1 = X1.reshape(1,-1), Y1.reshape(1,-1)
+    for i, seg_id in enumerate(seg_ids):
+        # find the boundary of each mask,
+        # compute the distance of each pixel from this boundary
+        bounds = find_boundaries(seg==seg_id, mode='inner')
+        Y2, X2 = np.nonzero(bounds)
+        dist = np.sqrt((X2.reshape(-1,1) - X1) ** 2 + (Y2.reshape(-1,1) - Y1) ** 2).min(axis=0)
+        m1 = dist<distMap[:,0]
+        distMap[m1,1] = distMap[m1,0]
+        distMap[m1,0] = dist[m1]
+        m2 = (dist>distMap[:,0])*(dist<distMap[:,1])*np.logical_not(m1)
+        distMap[m2,1] = dist[m2]
+    if len(seg_ids) == 1:
+        loss_map = w0 * np.exp((-1 * distMap[:,0] ** 2) / (2 * (sigma ** 2)))
+    else:        
+        loss_map = w0 * np.exp((-1 * distMap.sum(axis=1) ** 2) / (2 * (sigma ** 2)))
+    
+    loss_map = loss_map.reshape((nrows,ncols))
+    # add class weight map    
+    wc_1 = (seg==0).mean()
+    wc_0 = 1 - wc_1
+    loss_map[seg>0] += wc_1
+    loss_map[seg==0] += wc_0
+    return loss_map
+
