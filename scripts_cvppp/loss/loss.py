@@ -27,4 +27,22 @@ class JaccardLoss(nn.Module):
             intersection = (iflat * tflat).sum()
             loss += 1 - ((intersection + self.smooth) / 
                     ( iflat.sum() + tflat.sum() - intersection + self.smooth))
-            #print('loss:',intersection, iflat.sum(), tf
+            #print('loss:',intersection, iflat.sum(), tflat.sum())
+
+        # size_average=True for the jaccard loss
+        return loss / float(pred.size()[0])
+
+    def jaccard_loss_batch(self, pred, target):
+        iflat = pred.view(-1)
+        tflat = target.view(-1)
+        intersection = (iflat * tflat).sum()
+        loss = 1 - ((intersection + self.smooth) / 
+               ( iflat.sum() + tflat.sum() - intersection + self.smooth))
+        #print('loss:',intersection, iflat.sum(), tflat.sum())
+        return loss
+
+    def forward(self, pred, target):
+        #_assert_no_grad(target)
+        if not (target.size() == pred.size()):
+            raise ValueError("Target size ({}) must be the same as pred size ({})".format(target.size(), pred.size()))
+        if self.re
