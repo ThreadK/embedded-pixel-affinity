@@ -45,4 +45,27 @@ class JaccardLoss(nn.Module):
         #_assert_no_grad(target)
         if not (target.size() == pred.size()):
             raise ValueError("Target size ({}) must be the same as pred size ({})".format(target.size(), pred.size()))
-        if self.re
+        if self.reduce:
+            loss = self.jaccard_loss(pred, target)
+        else:    
+            loss = self.jaccard_loss_batch(pred, target)
+        return loss
+
+class DiceLoss(nn.Module):
+    """DICE loss.
+    """
+    # https://lars76.github.io/neural-networks/object-detection/losses-for-segmentation/
+
+    def __init__(self, size_average=True, reduce=True, smooth=100.0, power=1):
+        super(DiceLoss, self).__init__()
+        self.smooth = smooth
+        self.reduce = reduce
+        self.power = power
+
+    def dice_loss(self, pred, target):
+        loss = 0.
+
+        for index in range(pred.size()[0]):
+            iflat = pred[index].view(-1)
+            tflat = target[index].view(-1)
+            intersection = 
