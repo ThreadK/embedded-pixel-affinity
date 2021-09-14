@@ -68,4 +68,22 @@ class DiceLoss(nn.Module):
         for index in range(pred.size()[0]):
             iflat = pred[index].view(-1)
             tflat = target[index].view(-1)
-            intersection = 
+            intersection = (iflat * tflat).sum()
+            if self.power==1:
+                loss += 1 - ((2. * intersection + self.smooth) / 
+                        ( iflat.sum() + tflat.sum() + self.smooth))
+            else:
+                loss += 1 - ((2. * intersection + self.smooth) / 
+                        ( (iflat**self.power).sum() + (tflat**self.power).sum() + self.smooth))
+
+        # size_average=True for the dice loss
+        return loss / float(pred.size()[0])
+
+    def dice_loss_batch(self, pred, target):
+        iflat = pred.view(-1)
+        tflat = target.view(-1)
+        intersection = (iflat * tflat).sum()
+        
+        if self.power==1:
+            loss = 1 - ((2. * intersection + self.smooth) / 
+  
