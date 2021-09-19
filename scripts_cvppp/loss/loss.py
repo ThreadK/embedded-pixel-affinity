@@ -104,4 +104,28 @@ class DiceLoss(nn.Module):
         return loss
 
 class WeightedMSE(nn.Module):
-    """Weighted mean-sq
+    """Weighted mean-squared error.
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    def weighted_mse_loss(self, pred, target, weight):
+        s1 = torch.prod(torch.tensor(pred.size()[2:]).float())
+        s2 = pred.size()[0]
+        norm_term = (s1 * s2).cuda()
+        if weight is None:
+            return torch.sum((pred - target) ** 2) / norm_term
+        else:
+            return torch.sum(weight * (pred - target) ** 2) / norm_term
+
+    def forward(self, pred, target, weight=None):
+        #_assert_no_grad(target)
+        return self.weighted_mse_loss(pred, target, weight)
+
+class MSELoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.criterion = nn.MSELoss()
+    
+    def forward(self, pred, targ
