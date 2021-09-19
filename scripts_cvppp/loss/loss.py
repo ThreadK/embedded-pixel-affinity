@@ -86,4 +86,22 @@ class DiceLoss(nn.Module):
         
         if self.power==1:
             loss = 1 - ((2. * intersection + self.smooth) / 
-  
+                   (iflat.sum() + tflat.sum() + self.smooth))
+        else:
+            loss = 1 - ((2. * intersection + self.smooth) / 
+                   ( (iflat**self.power).sum() + (tflat**self.power).sum() + self.smooth))
+        return loss
+
+    def forward(self, pred, target):
+        #_assert_no_grad(target)
+        if not (target.size() == pred.size()):
+            raise ValueError("Target size ({}) must be the same as pred size ({})".format(target.size(), pred.size()))
+
+        if self.reduce:
+            loss = self.dice_loss(pred, target)
+        else:    
+            loss = self.dice_loss_batch(pred, target)
+        return loss
+
+class WeightedMSE(nn.Module):
+    """Weighted mean-sq
