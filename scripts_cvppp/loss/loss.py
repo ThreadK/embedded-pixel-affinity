@@ -128,4 +128,30 @@ class MSELoss(nn.Module):
         super().__init__()
         self.criterion = nn.MSELoss()
     
-    def forward(self, pred, targ
+    def forward(self, pred, target, weight=None):
+        return self.criterion(pred, target)
+
+class BCELoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.criterion = nn.BCELoss()
+    
+    def forward(self, pred, target, weight=None):
+        return self.criterion(pred, target)
+
+class WeightedBCE(nn.Module):
+    """Weighted binary cross-entropy.
+    """
+    def __init__(self, size_average=True, reduce=True):
+        super().__init__()
+        self.size_average = size_average
+        self.reduce = reduce
+
+    def forward(self, pred, target, weight=None):
+        #_assert_no_grad(target)
+        return F.binary_cross_entropy(pred, target, weight)
+
+class WeightedCE(nn.Module):
+    """Mask weighted multi-class cross-entropy (CE) loss.
+    """
+  
