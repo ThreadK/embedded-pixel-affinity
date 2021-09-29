@@ -171,4 +171,23 @@ class WeightedCE(nn.Module):
 # 1. Regularization
 #######################################################
 
-class Bin
+class BinaryReg(nn.Module):
+    """Regularization for encouraging the outputs to be binary.
+    """
+    def __init__(self, alpha=0.1):
+        super().__init__()
+        self.alpha = alpha
+    
+    def forward(self, pred):
+        diff = pred - 0.5
+        diff = torch.clamp(torch.abs(diff), min=1e-2)
+        loss = (1.0 / diff).mean()
+        return self.alpha * loss
+
+def BCE_loss_func(output,target, weight_rate=[1,1]):
+    # print("weight_rate",weight_rate)
+    weight = torch.FloatTensor([torch.sum(target == 1).item(), torch.sum(target == 0).item()]).cuda()
+
+    loss_fn = nn.CrossEntropyLoss(weight=weight)
+    # loss_fn = nn.BCELoss(weight=weight)
+    loss = loss_fn(ou
