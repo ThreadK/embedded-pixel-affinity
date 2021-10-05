@@ -190,4 +190,5 @@ def BCE_loss_func(output,target, weight_rate=[1,1]):
 
     loss_fn = nn.CrossEntropyLoss(weight=weight)
     # loss_fn = nn.BCELoss(weight=weight)
-    loss = loss_fn(ou
+    loss = loss_fn(output, target.squeeze(1).long())
+    return loss
