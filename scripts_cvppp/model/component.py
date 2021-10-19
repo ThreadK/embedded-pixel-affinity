@@ -34,4 +34,16 @@ class MoE(nn.Module):
         # weighted global avg pooling
         pool_weights = self.gap_weight(x)  # b,g,h,w
         pool_weights = pool_weights.view(b, self.groups, -1)
-    
+        pool_weights = F.softmax(pool_weights, dim=2)
+        pool_weights = pool_weights.view(b, self.groups, h, w)
+        weighted_x = x.view(b, self.groups, n, h, w)  # b,g,c/g,h,w
+        weighted_x = pool_weights.unsqueeze(2) * weighted_x
+        weighted_x = weighted_x.view(b, c, h, w)
+        x_global_avg_pooling = torch.sum(weighted_x, dim=(2, 3), keepdim=True)  # b,c,1,1
+        x_splits = x_global_avg_pooling.view(b, self.groups, n)  # b,g,c/g
+        x_splits = x_splits.view(-1, 1, n)  # b*g,1,c/g
+
+        # dot product phase 1
+        x_s = x.view(b * self.groups, n, -1)  # b*g,c/g,h*w
+        dot_product = torch.bmm(x_splits, x_s)  # b*g,1,h*w
+        dot_product
