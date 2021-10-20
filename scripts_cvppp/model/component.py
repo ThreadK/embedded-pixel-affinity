@@ -57,4 +57,16 @@ class MoE(nn.Module):
         # routing between heads
         hub_feature = x_splits.view(b, self.groups, n)  # b,g,c/g
         path_matrix = torch.bmm(hub_feature, hub_feature.permute(0, 2, 1))  # b,g,g
-        path_matrix = torch.n
+        path_matrix = torch.nn.functional.normalize(path_matrix, dim=2)
+        path_matrix = F.softmax(path_matrix*math.sqrt(self.groups), dim=2)
+       # print(path_matrix)
+        x_global_avg_pooling = torch.bmm(path_matrix, hub_feature)
+        x_global_avg_pooling = x_global_avg_pooling.view(b, c, 1, 1)
+        
+
+        # dot product phase 2
+        dot_product2 = torch.bmm(x_global_avg_pooling.view(-1, 1, n), y.view(b * self.groups, n, -1))  # b*g,1,h*w
+        dot_product2 = dot_product2.view(b, self.groups, h, w)  # b,g,h,w
+        dot_product2 = self.bn2(dot_product2)
+    #    sigmoid_mask = F.softmax(dot_product2.view(dot_product2.size(0), dot_product2.size(1), -1), dim=2)
+        sigmoid
