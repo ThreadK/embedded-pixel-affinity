@@ -46,4 +46,15 @@ class MoE(nn.Module):
         # dot product phase 1
         x_s = x.view(b * self.groups, n, -1)  # b*g,c/g,h*w
         dot_product = torch.bmm(x_splits, x_s)  # b*g,1,h*w
-        dot_product
+        dot_product = dot_product.view(b, self.groups, h, w)  # b,g,h,w
+        dot_product = self.bn(dot_product)
+   #     sigmoid_mask = F.softmax(dot_product.view(dot_product.size(0), dot_product.size(1), -1), dim=2)
+        sigmoid_mask = self.sigmoid(dot_product)
+        sigmoid_mask = sigmoid_mask.repeat(1, n, 1, 1).view(b, n, self.groups, h, w).permute(0, 2, 1, 3, 4)
+        sigmoid_mask = sigmoid_mask.contiguous().view(b, c, h, w)  # b,c,h,w
+        y = sigmoid_mask * x_global_avg_pooling + x
+        
+        # routing between heads
+        hub_feature = x_splits.view(b, self.groups, n)  # b,g,c/g
+        path_matrix = torch.bmm(hub_feature, hub_feature.permute(0, 2, 1))  # b,g,g
+        path_matrix = torch.n
