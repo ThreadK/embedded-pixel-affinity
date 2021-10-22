@@ -69,4 +69,13 @@ class MoE(nn.Module):
         dot_product2 = dot_product2.view(b, self.groups, h, w)  # b,g,h,w
         dot_product2 = self.bn2(dot_product2)
     #    sigmoid_mask = F.softmax(dot_product2.view(dot_product2.size(0), dot_product2.size(1), -1), dim=2)
-        sigmoid
+        sigmoid_mask = self.sigmoid(dot_product2)
+        sigmoid_mask = sigmoid_mask.repeat(1, n, 1, 1).view(b, n, self.groups, h, w).permute(0, 2, 1, 3, 4)
+        sigmoid_mask = sigmoid_mask.contiguous().view(b, c, h, w)  # b,c,h,w
+        y = sigmoid_mask * x_global_avg_pooling + y
+        
+        pool_weights = pool_weights.view(b, self.groups, -1)  # b,g,h*w
+        pool_weights, _ = torch.max(pool_weights, dim=1)
+        loss = torch.tensor(self.groups) - torch.sum(pool_weights, dim=1)
+
+        return y, loss
