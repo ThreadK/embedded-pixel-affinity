@@ -69,4 +69,26 @@ def cluster_dbscan(emb, eps, min_samples, semantic_mask=None):
     return cluster(emb, clustering, semantic_mask)
 
 
-def cluster_ms(emb, bandwidth, sem
+def cluster_ms(emb, bandwidth, semantic_mask=None):
+    clustering = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+    return cluster(emb, clustering, semantic_mask)
+
+
+def cluster_consistency(emb1, emb2, eps, iou_threshold, num_anchors=100):
+    """
+    Consistency clustering as described in https://arxiv.org/abs/2103.14572
+    """
+    clustering = MeanShift(bandwidth=eps, bin_seeding=True)
+    clusters = cluster(emb1, clustering)
+
+    for l in np.unique(clusters):
+        if l == 0:
+            continue
+
+        mask = clusters == l
+
+        iou_table = []
+        y, x = np.nonzero(mask)
+        for _ in range(num_anchors):
+            ind = np.random.randint(len(y))
+            anchor_emb = emb2[:, y[ind], x[ind]]
