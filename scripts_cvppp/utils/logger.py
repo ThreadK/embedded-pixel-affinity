@@ -25,4 +25,36 @@ class Log():
         # 设置日志等级
         fh.setLevel(logging.INFO)
         # 设置handler的格式对象
-        fh.setFormatter(self.formatte
+        fh.setFormatter(self.formatter)
+        # 将handler增加到logger中
+        self.logger.addHandler(fh)
+
+        # 创建一个StreamHandler,用于输出到控制台
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(self.formatter)
+        self.logger.addHandler(ch)
+
+        # # 关闭打开的文件
+        fh.close()
+
+    def info(self, message):
+        self.logger.info(message)
+
+    def debug(self, message):
+        self.logger.debug(message)
+
+    def warning(self, message):
+        self.logger.warning(message)
+
+    def error(self, message):
+        self.logger.error(message)
+
+    def critical(self, message):
+        self.logger.critical(message)
+
+if __name__ == '__main__':
+    def printlog():
+        log = Log()
+        log.info("hubo")
+    pri
