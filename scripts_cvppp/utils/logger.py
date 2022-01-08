@@ -57,4 +57,9 @@ if __name__ == '__main__':
     def printlog():
         log = Log()
         log.info("hubo")
-    pri
+    printlog()
+
+
+
+
+
