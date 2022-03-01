@@ -50,4 +50,29 @@ class UnionFind(object):
             v_root.parent = u_root
             u_root.rank += 1
 
-    # 
+    # get the new sets after merging
+    def get_merge_result(self):
+
+        merge_result = []
+
+        # find all the unique roots
+        roots = []
+        for u in self.nodes:
+            root = self.findNode(u)
+            if not root in roots:
+                roots.append(root)
+
+        # find ordering of roots (from 1 to n_roots)
+        roots_ordered = {}
+        root_id = 0
+        for root in roots:
+            merge_result.append( [] )
+            roots_ordered[root] = root_id
+            root_id += 1
+        for u in self.nodes:
+            u_label = u.label
+            root = self.findNode(u)
+            merge_result[ roots_ordered[root] ].append(u_label)
+
+        # sort the nodes in the result
+        #(this might re
