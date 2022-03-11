@@ -106,4 +106,17 @@ def remove_small_segments(segmentation,
         segmentation = vigra.analysis.labelVolumeWithBackground(
             segmentation.astype('uint32'), neighborhood=6, background_value=0)
 
-    # Get the unique values of the seg
+    # Get the unique values of the segmentation including counts
+    uniq, counts = np.unique(segmentation, return_counts=True)
+
+    # Keep all uniques that have a count smaller than size_thresh
+    small_objs = uniq[counts < size_thresh]
+    large_objs = uniq[counts >= size_thresh]
+    print('len(large_objs) == {}'.format(len(large_objs)))
+    print('len(small_objs) == {}'.format(len(small_objs)))
+
+    # I think this is the fastest (single threaded way) to do this
+    # If we really need to parallelize this, we need to rethink a little, but for now, this should be totally fine!
+    if relabel:
+        large_objs_to_consecutive = {obj_id : i+1 for i, obj_id in enumerate(large_objs)}
+        obj_dict = {obj_id : 0
