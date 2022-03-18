@@ -139,4 +139,21 @@ def merge_small_segments(mc_seg, min_seg_size):
 
     n_nodes = seg_rag.nodeNum
 
-    # FIXME This caused a yet 
+    # FIXME This caused a yet not investigated error
+    # assert n_nodes == mc_seg.max(), str(n_nodes) + " , " + str(mc_seg.max())
+    if not n_nodes == mc_seg.max():
+        print("Warning: (n_nodes = {}) != (mc_seg.max() = {})".format(n_nodes, mc_seg.max()))
+
+    print("Merging segments in mc-result with size smaller than", min_seg_size)
+
+    seg_sizes = np.bincount(mc_seg.ravel())
+
+    segs_merge = np.zeros(n_nodes+1, dtype = bool)
+    segs_merge[seg_sizes <= min_seg_size] = True
+    print("Merging", np.sum(segs_merge), "segments")
+
+    merge_nodes = []
+    for node in seg_rag.nodeIter():
+        n_id = node.id
+        # if the node id is not zero and it is marked in segs_merge, we merge it
+      
