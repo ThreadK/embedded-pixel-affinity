@@ -119,4 +119,24 @@ def remove_small_segments(segmentation,
     # If we really need to parallelize this, we need to rethink a little, but for now, this should be totally fine!
     if relabel:
         large_objs_to_consecutive = {obj_id : i+1 for i, obj_id in enumerate(large_objs)}
-        obj_dict = {obj_id : 0
+        obj_dict = {obj_id : 0 if obj_id in small_objs else large_objs_to_consecutive[obj_id] for obj_id in uniq}
+    else:
+        obj_dict = {obj_id : 0 if obj_id in small_objs else obj_id for obj_id in uniq}
+    segmentation = replace_from_dict(segmentation, obj_dict)
+    return segmentation
+
+
+# merge segments that are smaller than min_seg_size
+# TODO more efficiently ?!
+# TODO test this properly!
+def merge_small_segments(mc_seg, min_seg_size):
+    seg_rag = vigra.graphs.regionAdjacencyGraph(
+            vigra.graphs.gridGraph(mc_seg.shape),
+            mc_seg.astype(np.uint32))
+
+    # zero should be reserved for the ignore label!
+    assert 0 not in mc_seg
+
+    n_nodes = seg_rag.nodeNum
+
+    # FIXME This caused a yet 
