@@ -156,4 +156,20 @@ def merge_small_segments(mc_seg, min_seg_size):
     for node in seg_rag.nodeIter():
         n_id = node.id
         # if the node id is not zero and it is marked in segs_merge, we merge it
-      
+        if n_id != 0 and segs_merge[n_id]:
+            # need to find the adjacent node with largest edge
+            max_edge_size = 0
+            merge_node_id = -1
+            for adj_node in seg_rag.neighbourNodeIter(node):
+                edge = seg_rag.findEdge(node,adj_node)
+                edge_size = len( seg_rag.edgeCoordinates(edge) )
+                if edge_size > max_edge_size:
+                    max_edge_size = edge_size
+                    merge_node_id = adj_node.id
+            assert merge_node_id != -1
+            merge_nodes.append( (n_id, merge_node_id) )
+
+    # merge the nodes with udf
+    udf = UnionFind(n_nodes + 1)
+    for merge_pair in merge_nodes:
+        udf.merge(merg
